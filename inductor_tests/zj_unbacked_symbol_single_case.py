@@ -18,8 +18,8 @@ def eager(mask, where_info):
     z_indices = torch.nonzero(zmask).squeeze(-1)
     length = z_indices.shape[0]
 
-    full_1: "i64[256, 512 + u0]" = torch.ops.aten.full.default(
-        [256, 512 + length],
+    full_1: "i64[u0, 512]" = torch.ops.aten.full.default(
+        [length, 512],
         64,
         dtype=torch.int64,
         layout=torch.strided,
@@ -27,9 +27,9 @@ def eager(mask, where_info):
         pin_memory=False,
     )
 
-    size_full = torch.ops.aten.sym_size.int(full_1, 1)
-    full_2: "i64[256, 512 + u0]" = torch.ops.aten.full.default(
-        [256, size_full],
+    size_full = torch.ops.aten.sym_size.int(full_1, 0)
+    full_2: "i64[u0, 512]" = torch.ops.aten.full.default(
+        [size_full, 512],
         128,
         dtype=torch.int64,
         layout=torch.strided,
@@ -37,7 +37,7 @@ def eager(mask, where_info):
         pin_memory=False,
     )
 
-    where_t = torch.ops.aten.where.default(where_info, full_2, full_1)
+    where_t = torch.ops.aten.where.self(where_info, full_2, full_1)
     return where_t
 
 
@@ -48,7 +48,7 @@ a1 = torch.cat(
         torch.zeros((128,), device=current_device),
     )
 )
-b1 = (torch.arange(256, device=current_device) % 2 == 0).reshape(256, 1)
+b1 = (torch.arange(512, device=current_device) % 2 == 0).reshape(1, 512)
 
 eager_ret = eager(a1, b1)
 

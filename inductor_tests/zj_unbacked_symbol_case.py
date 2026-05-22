@@ -44,7 +44,7 @@ def eager(mask, mask2, where_info):
         pin_memory=False,
     )
 
-    where_t = torch.ops.aten.where.default(where_info, full_2, view2)
+    where_t = torch.ops.aten.where.self(where_info, full_2, view2)
     return where_t
 
 
