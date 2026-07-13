@@ -76,7 +76,12 @@ if __name__ == "__main__":
     # performance
     import json
 
-    from bench_utils import profile
+    import sys
+    from pathlib import Path
+    repo_root = str(Path(__file__).resolve().parents[3])
+    if repo_root not in sys.path:
+        sys.path.append(repo_root)
+    from TestToolkits.inductor_tests.bench_utils import profile
 
     eager_fn = lambda: mod(inputs)
     eager_res = profile(eager_fn)

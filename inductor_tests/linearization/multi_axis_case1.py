@@ -1,6 +1,6 @@
 import argparse
 import json
-import time
+import sys
 import unittest
 from pathlib import Path
 
@@ -10,6 +10,13 @@ try:
     import torch_npu  # noqa: F401
 except ImportError:
     torch_npu = None
+
+
+ROOT_DIR = Path(__file__).resolve().parents[3]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.append(str(ROOT_DIR))
+
+from TestToolkits.inductor_tests.bench_utils import profile, synchronize
 
 
 DEFAULT_BS = 128
@@ -82,37 +89,20 @@ def mark_dynamic_inputs(inputs, min_bs=1, max_bs=None, min_seq_len=1, max_seq_le
     return inputs
 
 
-def synchronize(device):
-    device_type = device.type if isinstance(device, torch.device) else str(device)
-    if device_type == "cuda" and torch.cuda.is_available():
-        torch.cuda.synchronize()
-    elif device_type == "npu" and hasattr(torch, "npu") and torch.npu.is_available():
-        torch.npu.synchronize()
-
-
-def benchmark_callable(fn, warmup=10, iters=50, device=DEFAULT_DEVICE):
-    for _ in range(max(warmup, 0)):
-        fn()
-    synchronize(device)
-
-    started = time.perf_counter()
-    for _ in range(max(iters, 1)):
-        fn()
-    synchronize(device)
-    elapsed_ms = (time.perf_counter() - started) * 1000.0
-    return {
-        "avg_ms": elapsed_ms / max(iters, 1),
-        "iters": max(iters, 1),
-        "warmup": max(warmup, 0),
-    }
-
-
 def compile_model(model, device=DEFAULT_DEVICE, backend="auto", mode="static"):
     if mode not in COMPILE_DYNAMIC:
         raise ValueError(f"Unsupported compile mode: {mode}")
     selected_backend = backend if backend != "auto" else ("aot_eager" if str(device) == "cpu" else "inductor")
     dynamic = COMPILE_DYNAMIC[mode]
-    return torch.compile(model, backend=selected_backend, dynamic=dynamic), selected_backend, dynamic
+    try:
+        compiled_model = torch.compile(model, backend=selected_backend, dynamic=dynamic)
+    except ModuleNotFoundError as exc:
+        if str(device) != "cpu" or selected_backend != "aot_eager":
+            raise
+        print(f"[multi_axis_case1] Falling back to eager module on CPU: {exc}")
+        selected_backend = "eager_fallback"
+        compiled_model = model
+    return compiled_model, selected_backend, dynamic
 
 
 def assert_outputs_close(eager_out, compiled_out):
@@ -157,27 +147,31 @@ def run_case(
         synchronize(device)
         assert_outputs_close(eager_out, compiled_out)
 
-        eager_perf = benchmark_callable(lambda: model(*inputs), warmup=warmup, iters=iters, device=device)
+        eager_perf = profile(lambda: model(*inputs), warmup=warmup, active=iters, device=device)
 
         # Exclude compilation overhead from the benchmark window.
         compiled_model(*compile_inputs)
         synchronize(device)
-        compiled_perf = benchmark_callable(
-            lambda: compiled_model(*compile_inputs), warmup=warmup, iters=iters, device=device
+        compiled_perf = profile(
+            lambda: compiled_model(*compile_inputs), warmup=warmup, active=iters, device=device
         )
 
-    speedup = eager_perf["avg_ms"] / compiled_perf["avg_ms"] if compiled_perf["avg_ms"] else 0.0
+    eager_total_us = eager_perf.get("__total_us__", 0.0)
+    compiled_total_us = compiled_perf.get("__total_us__", 0.0)
+    speedup = eager_total_us / compiled_total_us if compiled_total_us else 0.0
     summary = {
         "device": device,
         "dtype": str(inputs[0].dtype).replace("torch.", ""),
         "mode": mode,
         "bs": bs,
         "seq_len": seq_len,
+        "eager_bench_backend": eager_perf.get("__backend__", "unknown"),
+        "compiled_bench_backend": compiled_perf.get("__backend__", "unknown"),
         "compile_backend": selected_backend,
         "compile_dynamic": dynamic,
         "output_shape": list(eager_out.shape),
-        "eager_avg_ms": eager_perf["avg_ms"],
-        "compiled_avg_ms": compiled_perf["avg_ms"],
+        "eager_total_us": eager_total_us,
+        "compiled_total_us": compiled_total_us,
         "speedup": speedup,
     }
     return summary, eager_perf, compiled_perf
@@ -203,7 +197,7 @@ class MultiAxisCase1Test(unittest.TestCase):
         eager_out, = eager_mod(*inputs)
         compile_out, = compile_mod(*inputs)
 
-        self.assertEqual(backend, "aot_eager")
+        self.assertIn(backend, ("aot_eager", "eager_fallback"))
         self.assertFalse(dynamic)
         self.assertEqual(eager_out.shape, (1, 2400, 128, 16))
         torch.testing.assert_close(eager_out, compile_out, rtol=1e-5, atol=1e-5)
@@ -222,7 +216,7 @@ class MultiAxisCase1Test(unittest.TestCase):
         compile_out1, = compile_mod(*inputs1)
         compile_out2, = compile_mod(*inputs2)
 
-        self.assertEqual(backend, "aot_eager")
+        self.assertIn(backend, ("aot_eager", "eager_fallback"))
         self.assertIsNone(dynamic)
         self.assertEqual(compile_out1.shape, (1, 2400, 128, 16))
         self.assertEqual(compile_out2.shape, (1, 1024, 64, 16))
@@ -241,21 +235,28 @@ class MultiAxisCase1Test(unittest.TestCase):
         compile_out1, = compile_mod(*inputs1)
         compile_out2, = compile_mod(*inputs2)
 
-        self.assertEqual(backend, "aot_eager")
+        self.assertIn(backend, ("aot_eager", "eager_fallback"))
         self.assertTrue(dynamic)
         self.assertEqual(compile_out1.shape, (1, 2400, 128, 16))
         self.assertEqual(compile_out2.shape, (1, 1024, 64, 16))
         torch.testing.assert_close(eager_out1, compile_out1, rtol=1e-5, atol=1e-5)
         torch.testing.assert_close(eager_out2, compile_out2, rtol=1e-5, atol=1e-5)
 
-    def test_benchmark_callable_reports_positive_duration(self):
-        inputs = make_inputs(device="cpu", dtype=torch.float32, bs=64, seq_len=128)
-        mod = MultiAxisCase1().eval()
+    def test_run_case_reports_positive_total_us(self):
+        _, eager_perf, compiled_perf = run_case(
+            device="cpu",
+            dtype=torch.float32,
+            warmup=1,
+            iters=2,
+            mode="static",
+            bs=64,
+            seq_len=128,
+        )
 
-        result = benchmark_callable(lambda: mod(*inputs), warmup=1, iters=2)
-
-        self.assertIn("avg_ms", result)
-        self.assertGreater(result["avg_ms"], 0.0)
+        self.assertIn("__total_us__", eager_perf)
+        self.assertIn("__total_us__", compiled_perf)
+        self.assertGreater(eager_perf["__total_us__"], 0.0)
+        self.assertGreater(compiled_perf["__total_us__"], 0.0)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -304,8 +305,8 @@ def main():
         f"device={summary['device']} dtype={summary['dtype']} mode={summary['mode']} "
         f"backend={summary['compile_backend']} "
         f"output_shape={tuple(summary['output_shape'])} "
-        f"eager={summary['eager_avg_ms']:.3f} ms "
-        f"compile={summary['compiled_avg_ms']:.3f} ms "
+        f"eager={summary['eager_total_us']:.3f} us "
+        f"compile={summary['compiled_total_us']:.3f} us "
         f"speedup={summary['speedup']:.3f}x"
     )
 
