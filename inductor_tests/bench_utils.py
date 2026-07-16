@@ -3,7 +3,6 @@ import hashlib
 import os
 import shutil
 import subprocess
-import time
 import uuid
 
 from datetime import datetime, timezone
@@ -12,26 +11,47 @@ from typing import Callable, Dict
 import torch
 
 
-def _is_npu_device(device=None) -> bool:
-    if device is None:
-        return hasattr(torch, "npu") and torch.npu.is_available()
-    device_type = device.type if isinstance(device, torch.device) else str(device)
-    return device_type == "npu" and hasattr(torch, "npu") and torch.npu.is_available()
+def _device_type(device) -> str:
+    return device.type if isinstance(device, torch.device) else torch.device(device).type
 
 
-def synchronize(device=None) -> None:
-    if device is None:
-        if hasattr(torch, "npu") and torch.npu.is_available():
-            torch.npu.synchronize()
+def _npu_available() -> bool:
+    return hasattr(torch, "npu") and torch.npu.is_available()
+
+
+def resolve_device(device=None) -> torch.device:
+    requested = device if device is not None else os.getenv("DEVICE")
+    if requested is None:
+        if _npu_available():
+            requested = "npu"
         elif torch.cuda.is_available():
-            torch.cuda.synchronize()
-        return
+            requested = "cuda"
+        else:
+            raise RuntimeError("No supported accelerator is available; set DEVICE to npu or cuda")
 
-    device_type = device.type if isinstance(device, torch.device) else str(device)
-    if device_type == "npu" and hasattr(torch, "npu") and torch.npu.is_available():
-        torch.npu.synchronize()
-    elif device_type == "cuda" and torch.cuda.is_available():
-        torch.cuda.synchronize()
+    try:
+        resolved = torch.device(requested)
+    except (TypeError, RuntimeError) as exc:
+        raise ValueError(f"Unsupported DEVICE value: {requested}") from exc
+
+    if resolved.type == "npu" and not _npu_available():
+        raise RuntimeError(f"Requested NPU device is unavailable: {resolved}")
+    if resolved.type == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError(f"Requested CUDA device is unavailable: {resolved}")
+    if resolved.type not in {"npu", "cuda"}:
+        raise ValueError(f"Unsupported DEVICE value: {requested}")
+    return resolved
+
+
+def resolve_timer(device, timer=None) -> str:
+    selected = timer if timer is not None else os.getenv("BENCHMARK_TIMER")
+    if selected is None:
+        selected = "profiler" if _device_type(device) == "npu" else "event"
+    if selected not in {"profiler", "event"}:
+        raise ValueError("BENCHMARK_TIMER must be 'profiler' or 'event'")
+    if selected == "profiler" and _device_type(device) != "npu":
+        raise ValueError("profiler timing is NPU-only; use BENCHMARK_TIMER=event for CUDA")
+    return selected
 
 
 class SimpleProfilingAnalyzer:
@@ -224,26 +244,15 @@ def _profile_npu(fn: Callable, warmup=5, active=30, filter_list=None) -> Dict[st
     return {"__total_us__": 0.0, "__backend__": "npu_profile"}
 
 
-def _profile_fallback(fn: Callable, warmup=5, active=30, device=None) -> Dict[str, float]:
-    for _ in range(max(warmup, 0)):
-        fn()
-    synchronize(device)
+def _profile_event(fn: Callable, warmup=5, active=30) -> Dict[str, float]:
+    from triton.testing import do_bench
 
-    started = time.perf_counter()
-    for _ in range(max(active, 1)):
-        fn()
-    synchronize(device)
-    elapsed_us = (time.perf_counter() - started) * 1e6 / max(active, 1)
-    return {
-        "__total_us__": float(elapsed_us),
-        "__backend__": "wall_time",
-    }
+    elapsed_ms = do_bench(fn, warmup=warmup, rep=active, return_mode="mean")
+    return {"__total_us__": float(elapsed_ms) * 1e3, "__backend__": "event"}
 
 
-def profile(fn: Callable, warmup=5, active=30, filter_list=None, device=None) -> Dict[str, float]:
-    if _is_npu_device(device):
-        try:
-            return _profile_npu(fn, warmup=warmup, active=active, filter_list=filter_list)
-        except Exception as exc:
-            print(f"[bench_utils] NPU profiling failed, fallback to wall time: {exc}")
-    return _profile_fallback(fn, warmup=warmup, active=active, device=device)
+def profile(fn: Callable, warmup=5, active=30, filter_list=None, device=None, timer=None) -> Dict[str, float]:
+    resolved_device = resolve_device(device)
+    if resolve_timer(resolved_device, timer) == "profiler":
+        return _profile_npu(fn, warmup=warmup, active=active, filter_list=filter_list)
+    return _profile_event(fn, warmup=warmup, active=active)
