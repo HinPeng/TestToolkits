@@ -5,6 +5,16 @@ numel = bs * 16
 from easydict import EasyDict as edict
 
 import torch
+
+import sys
+from pathlib import Path
+
+repo_root = str(Path(__file__).resolve().parents[3])
+if repo_root not in sys.path:
+    sys.path.append(repo_root)
+from TestToolkits.inductor_tests.bench_utils import profile, resolve_device
+
+TARGET_DEVICE = resolve_device()
 import torch.nn as nn
 
 from torch._dynamo.testing import rand_strided
@@ -26,8 +36,8 @@ class MulSilu(nn.Module):
         
 
 def get_input_data(configs):
-    buf113 = rand_strided((1, numel, 8192), (numel*8192, 8192, 1), device='npu', dtype=torch.float32)
-    buf112 = rand_strided((numel, 8192), (8192, 1), device='npu', dtype=torch.float32)
+    buf113 = rand_strided((1, numel, 8192), (numel*8192, 8192, 1), device=TARGET_DEVICE, dtype=torch.float32)
+    buf112 = rand_strided((numel, 8192), (8192, 1), device=TARGET_DEVICE, dtype=torch.float32)
     return (buf113, buf112)
 
 
@@ -35,7 +45,7 @@ if __name__ == "__main__":
     configs = edict({
         "model": "MulSilu",     
         "is_compile_mode": True,
-        "device": "npu",
+        "device": TARGET_DEVICE,
     })
     
     inputs = get_input_data(configs)
@@ -43,15 +53,8 @@ if __name__ == "__main__":
 
     # performance
     import json
-    import sys
-    from pathlib import Path
-    repo_root = str(Path(__file__).resolve().parents[3])
-    if repo_root not in sys.path:
-        sys.path.append(repo_root)
-    from TestToolkits.inductor_tests.bench_utils import profile
-
     eager_fn = lambda: mod(inputs)
-    eager_res = profile(eager_fn)
+    eager_res = profile(eager_fn, device=TARGET_DEVICE)
     eager_perf_dump_file = os.path.join(
         "./log", os.path.splitext(os.path.basename(__file__))[0] + f"-{bs}-eager-perf.json"
     )
@@ -62,7 +65,7 @@ if __name__ == "__main__":
     mod(inputs)
 
     fn = lambda: mod(inputs)
-    res = profile(fn)
+    res = profile(fn, device=TARGET_DEVICE)
     perf_dump_file = os.path.join(
         "./log", os.path.splitext(os.path.basename(__file__))[0] + f"-{bs}-perf.json"
     )
@@ -73,7 +76,7 @@ if __name__ == "__main__":
     compile_total_us = res.get("__total_us__", 0.0)
     if compile_total_us:
         print(
-            f"eager total: {eager_total_us:.3f} us, "
+            f"device: {TARGET_DEVICE}, timing: {res['__backend__']}, eager total: {eager_total_us:.3f} us, "
             f"compile total: {compile_total_us:.3f} us, "
             f"speedup: {eager_total_us / compile_total_us:.3f}x"
         )

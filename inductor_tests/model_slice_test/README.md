@@ -34,3 +34,15 @@ This directory contains standalone inductor repros. Use this file to quickly fin
 - `model_slice11.py` and `model_slice13.py` are both softmax family slices, but `11` is bias/mask driven and `13` is a pure vector masked softmax.
 - `model_slice4.py` and `model_slice5.py` are the longest slices here; they capture larger transformer-style blocks rather than a single isolated op.
 - The exact tensor sizes are kept in the scripts themselves.
+
+## Benchmarking
+
+All slices accept `DEVICE=npu|cuda` and `BENCHMARK_TIMER=profiler|event`.
+
+```bash
+DEVICE=npu python model_slice1.py
+DEVICE=npu BENCHMARK_TIMER=event python model_slice1.py
+DEVICE=cuda python model_slice1.py
+```
+
+NPU defaults to profiler timing. CUDA uses Triton's event timer, and profiler timing is NPU-only. Both eager and compiled runs print the selected device, timing backend, mean microseconds, and speedup. NPU profiler runs retain per-kernel JSON values.

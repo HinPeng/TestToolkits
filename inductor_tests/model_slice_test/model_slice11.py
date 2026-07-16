@@ -5,6 +5,16 @@ numel = bs * 16
 from easydict import EasyDict as edict
 
 import torch
+
+import sys
+from pathlib import Path
+
+repo_root = str(Path(__file__).resolve().parents[3])
+if repo_root not in sys.path:
+    sys.path.append(repo_root)
+from TestToolkits.inductor_tests.bench_utils import profile, resolve_device
+
+TARGET_DEVICE = resolve_device()
 import torch.nn as nn
 
 from torch._dynamo.testing import rand_strided
@@ -22,7 +32,7 @@ class SoftmaxAddEtc(nn.Module):
         full_default_3: "i64[1, 1, 1, 2048]" = torch.ops.aten.full.default([1, 1, 1, numel], 1, dtype = torch.int64, layout = torch.strided, device = self.configs.device, pin_memory = False)
 
         # File: /usr/local/python3.11.13/lib/python3.11/site-packages/transformers/modeling_utils.py:1678 in invert_attention_mask, code: encoder_extended_attention_mask = encoder_extended_attention_mask.to(dtype=self.dtype)  # fp16 compatibility
-        _npu_dtype_cast_4: "f32[1, 1, 1, 2048]" = torch.ops.npu._npu_dtype_cast.default(full_default_3, torch.float32);  full_default_3 = None
+        _npu_dtype_cast_4: "f32[1, 1, 1, 2048]" = torch.ops.aten._to_copy.default(full_default_3, dtype=torch.float32);  full_default_3 = None
 
         # File: /usr/local/python3.11.13/lib/python3.11/site-packages/transformers/modeling_utils.py:1679 in invert_attention_mask, code: encoder_extended_attention_mask = (1.0 - encoder_extended_attention_mask) * torch.finfo(self.dtype).min
         sub_7: "f32[1, 1, 1, 2048]" = torch.ops.aten.sub.Tensor(1.0, _npu_dtype_cast_4);  _npu_dtype_cast_4 = None
@@ -55,7 +65,7 @@ if __name__ == "__main__":
     configs = edict({
         "model": "SoftmaxAddEtc",
         "is_compile_mode": True,
-        "device": "npu",
+        "device": TARGET_DEVICE,
     })
     
     inputs = get_input_data(configs)
@@ -63,15 +73,8 @@ if __name__ == "__main__":
 
     # performance
     import json
-    import sys
-    from pathlib import Path
-    repo_root = str(Path(__file__).resolve().parents[3])
-    if repo_root not in sys.path:
-        sys.path.append(repo_root)
-    from TestToolkits.inductor_tests.bench_utils import profile
-
     eager_fn = lambda: mod(inputs)
-    eager_res = profile(eager_fn)
+    eager_res = profile(eager_fn, device=TARGET_DEVICE)
     eager_perf_dump_file = os.path.join(
         "./log", os.path.splitext(os.path.basename(__file__))[0] + f"-{bs}-eager-perf.json"
     )
@@ -82,7 +85,7 @@ if __name__ == "__main__":
     mod(inputs)
 
     fn = lambda: mod(inputs)
-    res = profile(fn)
+    res = profile(fn, device=TARGET_DEVICE)
     perf_dump_file = os.path.join(
         "./log", os.path.splitext(os.path.basename(__file__))[0] + f"-{bs}-perf.json"
     )
@@ -93,7 +96,7 @@ if __name__ == "__main__":
     compile_total_us = res.get("__total_us__", 0.0)
     if compile_total_us:
         print(
-            f"eager total: {eager_total_us:.3f} us, "
+            f"device: {TARGET_DEVICE}, timing: {res['__backend__']}, eager total: {eager_total_us:.3f} us, "
             f"compile total: {compile_total_us:.3f} us, "
             f"speedup: {eager_total_us / compile_total_us:.3f}x"
         )

@@ -3,6 +3,16 @@ import os
 bs = int(os.getenv('BATCH_SIZE', 128))
 
 import torch
+
+import sys
+from pathlib import Path
+
+repo_root = str(Path(__file__).resolve().parents[3])
+if repo_root not in sys.path:
+    sys.path.append(repo_root)
+from TestToolkits.inductor_tests.bench_utils import profile, resolve_device
+
+TARGET_DEVICE = resolve_device()
 from torch import tensor, device
 import torch.fx as fx
 from torch._dynamo.testing import rand_strided
@@ -78,15 +88,15 @@ class Repro(torch.nn.Module):
         return (div,)
         
 def load_args(reader):
-    buf0 = reader.storage(None, 307200, device=device(type='npu', index=0), dtype_hint=torch.int64)
+    buf0 = reader.storage(None, 307200, device=TARGET_DEVICE, dtype_hint=torch.int64)
     reader.tensor(buf0, (128, 300), dtype=torch.int64, is_leaf=True)  # arg0_1
-    buf1 = reader.storage(None, 153600, device=device(type='npu', index=0))
+    buf1 = reader.storage(None, 153600, device=TARGET_DEVICE)
     reader.tensor(buf1, (128, 300), is_leaf=True)  # arg1_1
-    buf2 = reader.storage(None, 5120000, device=device(type='npu', index=0))
+    buf2 = reader.storage(None, 5120000, device=TARGET_DEVICE)
     reader.tensor(buf2, (10000, 128), is_leaf=True)  # arg2_1
-    buf3 = reader.storage(None, 1536, device=device(type='npu', index=0))
+    buf3 = reader.storage(None, 1536, device=TARGET_DEVICE)
     reader.tensor(buf3, (384,), is_leaf=True)  # arg3_1
-    buf4 = reader.storage(None, 196608, device=device(type='npu', index=0))
+    buf4 = reader.storage(None, 196608, device=TARGET_DEVICE)
     reader.tensor(buf4, (384, 128), is_leaf=True)  # arg4_1
     
 load_args._version = 0
@@ -100,15 +110,8 @@ if __name__ == '__main__':
 
         # performance
         import json
-        import sys
-        from pathlib import Path
-        repo_root = str(Path(__file__).resolve().parents[3])
-        if repo_root not in sys.path:
-            sys.path.append(repo_root)
-        from TestToolkits.inductor_tests.bench_utils import profile
-
         eager_fn = lambda: mod(*args)
-        eager_res = profile(eager_fn)
+        eager_res = profile(eager_fn, device=TARGET_DEVICE)
         eager_perf_dump_file = os.path.join(
             "./log", os.path.splitext(os.path.basename(__file__))[0] + f"-{bs}-eager-perf.json"
         )
@@ -119,7 +122,7 @@ if __name__ == '__main__':
         mod(*args)
 
         fn = lambda: mod(*args)
-        res = profile(fn)
+        res = profile(fn, device=TARGET_DEVICE)
         perf_dump_file = os.path.join(
             "./log", os.path.splitext(os.path.basename(__file__))[0] + f"-{bs}-perf.json"
         )
@@ -130,7 +133,7 @@ if __name__ == '__main__':
         compile_total_us = res.get("__total_us__", 0.0)
         if compile_total_us:
             print(
-                f"eager total: {eager_total_us:.3f} us, "
+                f"device: {TARGET_DEVICE}, timing: {res['__backend__']}, eager total: {eager_total_us:.3f} us, "
                 f"compile total: {compile_total_us:.3f} us, "
                 f"speedup: {eager_total_us / compile_total_us:.3f}x"
             )

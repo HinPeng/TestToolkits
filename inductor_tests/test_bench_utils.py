@@ -9,6 +9,7 @@ from unittest import mock
 
 
 BENCH_UTILS_PATH = Path(__file__).with_name("bench_utils.py")
+MODEL_SLICE_DIR = Path(__file__).parent / "model_slice_test"
 
 
 def load_bench_utils(npu_available=False, cuda_available=False):
@@ -86,6 +87,26 @@ class BenchUtilsTest(unittest.TestCase):
             result = bench_utils.profile(lambda: None, warmup=7, active=11, device="cuda")
         testing.do_bench.assert_called_once_with(mock.ANY, warmup=7, rep=11, return_mode="mean")
         self.assertEqual(result, {"__total_us__": 2500.0, "__backend__": "event"})
+
+
+class ModelSliceDeviceWiringTest(unittest.TestCase):
+    def test_every_model_slice_uses_the_shared_target_device(self):
+        for path in sorted(MODEL_SLICE_DIR.glob("model_slice*.py")):
+            source = path.read_text(encoding="utf-8")
+            with self.subTest(path=path.name):
+                self.assertIn("TARGET_DEVICE = resolve_device()", source)
+                self.assertNotRegex(source, r"device\s*=\s*['\"]npu['\"]")
+                self.assertNotIn("device(type='npu', index=0)", source)
+                self.assertGreaterEqual(source.count("device=TARGET_DEVICE"), 2)
+                self.assertIn("timing:", source)
+        self.assertNotIn(
+            "torch.ops.npu._npu_dtype_cast",
+            (MODEL_SLICE_DIR / "model_slice11.py").read_text(encoding="utf-8"),
+        )
+        self.assertIn(
+            'if TARGET_DEVICE.type == "npu":',
+            (MODEL_SLICE_DIR / "model_slice12.py").read_text(encoding="utf-8"),
+        )
 
 
 if __name__ == "__main__":

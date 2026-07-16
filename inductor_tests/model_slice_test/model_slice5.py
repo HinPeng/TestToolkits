@@ -3,6 +3,16 @@ import os
 bs = int(os.getenv('BATCH_SIZE', 128))
 
 import torch
+
+import sys
+from pathlib import Path
+
+repo_root = str(Path(__file__).resolve().parents[3])
+if repo_root not in sys.path:
+    sys.path.append(repo_root)
+from TestToolkits.inductor_tests.bench_utils import profile, resolve_device
+
+TARGET_DEVICE = resolve_device()
 from torch import tensor, device
 import torch.fx as fx
 from torch._dynamo.testing import rand_strided
@@ -51,7 +61,7 @@ class Repro(torch.nn.Module):
     
     
     def forward(self, arg0_1, arg1_1, arg2_1, arg3_1, arg4_1, arg5_1, arg6_1, arg7_1, arg8_1, arg9_1, arg10_1, arg11_1, arg12_1, arg13_1):
-        full_default = torch.ops.aten.full.default([], -1000000000.0, dtype = torch.float32, layout = torch.strided, device = device(type='npu', index=0), pin_memory = False)
+        full_default = torch.ops.aten.full.default([], -1000000000.0, dtype = torch.float32, layout = torch.strided, device = TARGET_DEVICE, pin_memory = False)
         where = torch.ops.aten.where.self(arg1_1, full_default, arg0_1);  arg1_1 = full_default = arg0_1 = None
         amax = torch.ops.aten.amax.default(where, [-1], True)
         sub = torch.ops.aten.sub.Tensor(where, amax);  where = amax = None
@@ -106,33 +116,33 @@ class Repro(torch.nn.Module):
         return (add_5,)
         
 def load_args(reader):
-    buf0 = reader.storage(None, 5120000, device=device(type='npu', index=0))
+    buf0 = reader.storage(None, 5120000, device=TARGET_DEVICE)
     reader.tensor(buf0, (128, 4, 50, 50), is_leaf=True)  # arg0_1
-    buf1 = reader.storage(None, 128, device=device(type='npu', index=0), dtype_hint=torch.bool)
+    buf1 = reader.storage(None, 128, device=TARGET_DEVICE, dtype_hint=torch.bool)
     reader.tensor(buf1, (128, 1, 1, 1), dtype=torch.bool, is_leaf=True)  # arg1_1
-    buf2 = reader.storage(None, 819200, device=device(type='npu', index=0))
+    buf2 = reader.storage(None, 819200, device=TARGET_DEVICE)
     reader.tensor(buf2, (128, 4, 50, 8), (1600, 8, 32, 1), is_leaf=True)  # arg2_1
-    buf3 = reader.storage(None, 4096, device=device(type='npu', index=0))
+    buf3 = reader.storage(None, 4096, device=TARGET_DEVICE)
     reader.tensor(buf3, (32, 32), is_leaf=True)  # arg3_1
-    buf4 = reader.storage(None, 128, device=device(type='npu', index=0))
+    buf4 = reader.storage(None, 128, device=TARGET_DEVICE)
     reader.tensor(buf4, (32,), is_leaf=True)  # arg4_1
-    buf5 = reader.storage(None, 819200, device=device(type='npu', index=0))
+    buf5 = reader.storage(None, 819200, device=TARGET_DEVICE)
     reader.tensor(buf5, (128, 50, 32), is_leaf=True)  # arg5_1
-    buf6 = reader.storage(None, 128, device=device(type='npu', index=0))
+    buf6 = reader.storage(None, 128, device=TARGET_DEVICE)
     reader.tensor(buf6, (32,), is_leaf=True)  # arg6_1
-    buf7 = reader.storage(None, 128, device=device(type='npu', index=0))
+    buf7 = reader.storage(None, 128, device=TARGET_DEVICE)
     reader.tensor(buf7, (32,), is_leaf=True)  # arg7_1
-    buf8 = reader.storage(None, 16384, device=device(type='npu', index=0))
+    buf8 = reader.storage(None, 16384, device=TARGET_DEVICE)
     reader.tensor(buf8, (128, 32), is_leaf=True)  # arg8_1
-    buf9 = reader.storage(None, 512, device=device(type='npu', index=0))
+    buf9 = reader.storage(None, 512, device=TARGET_DEVICE)
     reader.tensor(buf9, (128,), is_leaf=True)  # arg9_1
-    buf10 = reader.storage(None, 16384, device=device(type='npu', index=0))
+    buf10 = reader.storage(None, 16384, device=TARGET_DEVICE)
     reader.tensor(buf10, (32, 128), is_leaf=True)  # arg10_1
-    buf11 = reader.storage(None, 128, device=device(type='npu', index=0))
+    buf11 = reader.storage(None, 128, device=TARGET_DEVICE)
     reader.tensor(buf11, (32,), is_leaf=True)  # arg11_1
-    buf12 = reader.storage(None, 128, device=device(type='npu', index=0))
+    buf12 = reader.storage(None, 128, device=TARGET_DEVICE)
     reader.tensor(buf12, (32,), is_leaf=True)  # arg12_1
-    buf13 = reader.storage(None, 128, device=device(type='npu', index=0))
+    buf13 = reader.storage(None, 128, device=TARGET_DEVICE)
     reader.tensor(buf13, (32,), is_leaf=True)  # arg13_1
 
 load_args._version = 0
@@ -146,15 +156,8 @@ if __name__ == '__main__':
 
         # performance
         import json
-        import sys
-        from pathlib import Path
-        repo_root = str(Path(__file__).resolve().parents[3])
-        if repo_root not in sys.path:
-            sys.path.append(repo_root)
-        from TestToolkits.inductor_tests.bench_utils import profile
-
         eager_fn = lambda: mod(*args)
-        eager_res = profile(eager_fn)
+        eager_res = profile(eager_fn, device=TARGET_DEVICE)
         eager_perf_dump_file = os.path.join(
             "./log", os.path.splitext(os.path.basename(__file__))[0] + f"-{bs}-eager-perf.json"
         )
@@ -165,7 +168,7 @@ if __name__ == '__main__':
         mod(*args)
 
         fn = lambda: mod(*args)
-        res = profile(fn)
+        res = profile(fn, device=TARGET_DEVICE)
         perf_dump_file = os.path.join(
             "./log", os.path.splitext(os.path.basename(__file__))[0] + f"-{bs}-perf.json"
         )
@@ -176,7 +179,7 @@ if __name__ == '__main__':
         compile_total_us = res.get("__total_us__", 0.0)
         if compile_total_us:
             print(
-                f"eager total: {eager_total_us:.3f} us, "
+                f"device: {TARGET_DEVICE}, timing: {res['__backend__']}, eager total: {eager_total_us:.3f} us, "
                 f"compile total: {compile_total_us:.3f} us, "
                 f"speedup: {eager_total_us / compile_total_us:.3f}x"
             )
