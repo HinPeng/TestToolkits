@@ -19,12 +19,13 @@ This directory contains standalone inductor repros. Use this file to quickly fin
 | 11 | `model_slice11.py` | attention mask prep + additive bias + softmax |
 | 12 | `model_slice12.py` | masked embedding lookup + weighted sum |
 | 13 | `model_slice13.py` | vector masked softmax |
+| 14 | `model_slice14.py` | fixed-shape softmax `(76800, 150)` |
 
 ## Motif Index
 
 | Motif | Slices |
 | --- | --- |
-| Softmax / attention-like | 2, 4, 5, 11, 13 |
+| Softmax / attention-like | 2, 4, 5, 11, 13, 14 |
 | Embedding / reduction | 1, 7, 12 |
 | Normalization / residual | 1, 4, 5, 9 |
 | Pointwise / gating | 3, 6, 8, 10 |
