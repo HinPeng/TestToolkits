@@ -43,6 +43,26 @@ def resolve_device(device=None) -> torch.device:
     return resolved
 
 
+def synchronize(device=None) -> None:
+    """Synchronize the specified device, waiting for all pending operations."""
+    if device is None:
+        if _npu_available():
+            torch.npu.synchronize()
+        elif torch.cuda.is_available():
+            torch.cuda.synchronize()
+        return
+    if isinstance(device, torch.device):
+        device_type = device.type
+    elif isinstance(device, str):
+        device_type = device
+    else:
+        device_type = str(device)
+    if device_type == "npu":
+        torch.npu.synchronize()
+    elif device_type == "cuda":
+        torch.cuda.synchronize()
+
+
 def resolve_timer(device, timer=None) -> str:
     selected = timer if timer is not None else os.getenv("BENCHMARK_TIMER")
     if selected is None:
