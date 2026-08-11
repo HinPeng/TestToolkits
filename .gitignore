@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# PyTorch 2.13.0 Inductor evidence generated bulk
+/inductor_tests/inductor_v213_evidence/results/**/cache/
+/inductor_tests/inductor_v213_evidence/results/**/*.so
+/inductor_tests/inductor_v213_evidence/results/**/*.o
+/inductor_tests/inductor_v213_evidence/results/**/*.a
+/inductor_tests/inductor_v213_evidence/results/**/*.cubin
+/inductor_tests/inductor_v213_evidence/results/**/*.pt
+/inductor_tests/inductor_v213_evidence/results/**/*.pth
+/inductor_tests/inductor_v213_evidence/results/**/*.bin
+/inductor_tests/inductor_v213_evidence/results/**/*.tar.gz
