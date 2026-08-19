@@ -25,7 +25,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent
 CUSTOM_TEST = ROOT / "test_dynamic_flex_attention.py"
-COMMUNITY_TEST = ROOT / "test_flex_attention_dynamic_mask_out.py"
+PATCH_TEST = ROOT / "test_flex_attention_dynamic_mask_out.py"
+COMMUNITY_TEST = ROOT / "test_flex_attention.py"
 RUN_ROOT = ROOT / "flex_attention_test_runs"
 
 CUSTOM_CASES: tuple[dict[str, Any], ...] = (
@@ -79,7 +80,7 @@ CUSTOM_CASES: tuple[dict[str, Any], ...] = (
     },
 )
 
-COMMUNITY_SOURCE_METHODS = (
+PATCH_SOURCE_METHODS = (
     "test_eager_compact_metadata_is_removed",
     "test_compact_metadata_is_split_into_offsets_and_mapping",
     "test_compact_kernels_use_symbolic_mapping_sizes",
@@ -93,7 +94,7 @@ COMMUNITY_SOURCE_METHODS = (
     "test_backward_dq_task_count_comes_from_runtime_q_shape",
     "test_backward_block_position_covers_all_runtime_kv_blocks",
 )
-COMMUNITY_NPU_METHODS = (
+PATCH_NPU_METHODS = (
     "test_create_block_mask_has_no_compact_metadata_capture",
     "test_forward_reuses_graph_for_dynamic_q_kv_and_sparse_z",
     "test_backward_reuses_graph_for_dynamic_q_kv_and_sparse_z",
@@ -101,25 +102,25 @@ COMMUNITY_NPU_METHODS = (
 )
 
 
-def _community_cases() -> tuple[dict[str, Any], ...]:
+def _patch_cases() -> tuple[dict[str, Any], ...]:
     cases: list[dict[str, Any]] = []
-    for index, method in enumerate(COMMUNITY_SOURCE_METHODS, start=1):
+    for index, method in enumerate(PATCH_SOURCE_METHODS, start=1):
         cases.append(
             {
-                "case": f"M{index:02d}_{method.removeprefix('test_')}",
-                "suite": "community",
-                "kind": "community",
+                "case": f"P{index:02d}_{method.removeprefix('test_')}",
+                "suite": "patch",
+                "kind": "patch",
                 "selector": f"TestFlexAttentionDynamicMaskOutSource.{method}",
                 "timeout": 180,
             }
         )
-    offset = len(COMMUNITY_SOURCE_METHODS) + 1
-    for index, method in enumerate(COMMUNITY_NPU_METHODS, start=offset):
+    offset = len(PATCH_SOURCE_METHODS) + 1
+    for index, method in enumerate(PATCH_NPU_METHODS, start=offset):
         cases.append(
             {
-                "case": f"M{index:02d}_{method.removeprefix('test_')}",
-                "suite": "community",
-                "kind": "community",
+                "case": f"P{index:02d}_{method.removeprefix('test_')}",
+                "suite": "patch",
+                "kind": "patch",
                 "selector": f"TestFlexAttentionDynamicMaskOutNPU.{method}",
                 "timeout": 600 if "backward" in method else 300,
             }
@@ -127,8 +128,51 @@ def _community_cases() -> tuple[dict[str, Any], ...]:
     return tuple(cases)
 
 
-COMMUNITY_CASES = _community_cases()
-ALL_CASES = CUSTOM_CASES + COMMUNITY_CASES
+COMMUNITY_DYNAMIC_NODES = (
+    # Explicit dynamic=True with shape changes and graph-reuse assertions.
+    *(f"TestFlexAttention::test_builtin_score_mods_dynamic_float16_score_mask_mod{i}" for i in range(8)),
+    # Automatic dynamic-shape promotion: static first graph, dynamic second
+    # graph, then reuse the second graph for a third shape.
+    *(f"TestFlexAttention::test_builtin_score_mods_automatic_dynamic_float16_score_mod{i}" for i in range(8)),
+    # Dynamic lowering under additional kernel/runtime constraints.
+    "TestFlexAttention::test_dynamic_shapes_with_custom_kernel_options",
+    "TestFlexAttention::test_dynamic_shapes_with_max_autotune",
+    "TestFlexAttention::test_strided_backwards",
+    # Additional dynamic-shape cases discovered in the NPU community file.
+    "TestFlexAttention::test_dynamic_shapes_bug_dynamic_batch",
+    "TestFlexAttention::test_free_symbol_dynamic",
+    "TestFlexAttention::test_symbol_closure_in_score_mod",
+    "TestFlexAttention::test_non_contiguous_last_dim",
+)
+
+
+def _community_dynamic_cases() -> tuple[dict[str, Any], ...]:
+    cases: list[dict[str, Any]] = []
+    for index, node in enumerate(dict.fromkeys(COMMUNITY_DYNAMIC_NODES), start=1):
+        method = node.rsplit("::", 1)[-1]
+        if "builtin_score_mods_dynamic" in method:
+            timeout = 900
+        elif "automatic_dynamic" in method:
+            timeout = 900
+        elif method in {"test_strided_backwards", "test_free_symbol_dynamic"}:
+            timeout = 600
+        else:
+            timeout = 300
+        cases.append(
+            {
+                "case": f"M{index:02d}_{method.removeprefix('test_')}",
+                "suite": "community",
+                "kind": "community",
+                "selector": node,
+                "timeout": timeout,
+            }
+        )
+    return tuple(cases)
+
+
+PATCH_CASES = _patch_cases()
+COMMUNITY_CASES = _community_dynamic_cases()
+ALL_CASES = CUSTOM_CASES + PATCH_CASES + COMMUNITY_CASES
 CASE_BY_NAME = {case["case"]: case for case in ALL_CASES}
 
 
@@ -163,7 +207,16 @@ def _failure_tail(log_path: Path, line_count: int = 40) -> str:
 def _command_for(case: dict[str, Any]) -> list[str]:
     if case["kind"] == "custom":
         return [sys.executable, str(CUSTOM_TEST), "--case", case["case"]]
-    return [sys.executable, str(COMMUNITY_TEST), str(case["selector"])]
+    if case["kind"] == "patch":
+        return [sys.executable, str(PATCH_TEST), str(case["selector"])]
+    return [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-q",
+        "-s",
+        f"{COMMUNITY_TEST}::{case['selector']}",
+    ]
 
 
 def _metadata() -> dict[str, Any]:
@@ -195,7 +248,7 @@ def _status_for(record: dict[str, Any], log_text: str) -> str:
     if record.get("returncode") == 0:
         # unittest exits 0 for both pass and skip.  Preserve a skip as a
         # distinct status so an NPU-less server cannot look like a full pass.
-        if re.search(r"skipped=\d+", log_text):
+        if re.search(r"(?:skipped=\d+|\d+\s+skipped)", log_text):
             return "SKIP"
         return "PASS"
     return "FAIL"
@@ -276,6 +329,8 @@ def _selected_cases(suite: str, requested: list[str] | None) -> list[dict[str, A
         return [CASE_BY_NAME[name] for name in requested]
     if suite == "dynamic":
         return list(CUSTOM_CASES)
+    if suite == "patch":
+        return list(PATCH_CASES)
     if suite == "community":
         return list(COMMUNITY_CASES)
     return list(ALL_CASES)
@@ -285,7 +340,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--suite",
-        choices=("all", "dynamic", "community"),
+        choices=("all", "dynamic", "patch", "community"),
         default="all",
         help="test suite to run (default: all)",
     )
