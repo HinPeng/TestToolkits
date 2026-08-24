@@ -23,7 +23,6 @@ from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
     npu_device,          # noqa: F401  (pytest fixture re-export)
-    reset_dynamo_state,  # noqa: F401  (pytest fixture re-export)
     _causal_mask,
     _check_one_shape,
     _rel_bias_score_mod,
