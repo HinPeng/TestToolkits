@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the root-directory FlexAttention envelope tests by letter.
+"""Run the root-directory FlexAttention envelope tests by case.
 
 Examples::
 
@@ -7,10 +7,12 @@ Examples::
     python run_flex_attention_tests.py a
     python run_flex_attention_tests.py --cases a,c-f
     python run_flex_attention_tests.py a-s --timeout 3600
+    python run_flex_attention_tests.py sd
+    python run_flex_attention_tests.py --cases a-s,sd
 
-Each selected letter is executed in a fresh pytest process.  A timestamped
+Each selected case is executed in a fresh pytest process.  A timestamped
 run directory contains one log and the final ``torch_compile_debug/`` tree per
-letter, plus JSON and Markdown summaries.  Inductor/Triton intermediate caches
+case, plus JSON and Markdown summaries.  Inductor/Triton intermediate caches
 are created outside the run directory and removed after the case finishes.
 """
 
@@ -40,14 +42,18 @@ LETTER_MIN = "a"
 LETTER_MAX = "s"
 LETTERS = tuple(chr(code) for code in range(ord(LETTER_MIN), ord(LETTER_MAX) + 1))
 CASE_FILE_RE = re.compile(r"^test_flex_attention_([a-s])_(.+)\.py$")
+SPECIAL_CASE_FILES = {
+    "sd": "test_sd_score_mod_dynamic.py",
+}
 
 
 def discover_cases(root: Path = ROOT) -> dict[str, dict[str, Any]]:
-    """Discover available ``a``-through-``s`` test modules.
+    """Discover available lettered modules and registered special cases.
 
     The repository intentionally does not have a file for every letter.  The
     returned mapping therefore describes files that really exist instead of
-    manufacturing empty cases for missing letters.
+    manufacturing empty cases for missing letters. Special cases use explicit
+    selectors so their names do not need to follow the lettered file pattern.
     """
 
     cases: dict[str, dict[str, Any]] = {}
@@ -64,6 +70,18 @@ def discover_cases(root: Path = ROOT) -> dict[str, dict[str, Any]]:
             "file": path,
             "relative_file": str(path.relative_to(root)),
         }
+    for case_id, filename in SPECIAL_CASE_FILES.items():
+        path = root / filename
+        if not path.is_file():
+            continue
+        if case_id in cases:
+            raise ValueError(f"duplicate test case selector {case_id!r}")
+        cases[case_id] = {
+            "letter": case_id,
+            "name": f"{case_id}_score_mod_dynamic",
+            "file": path,
+            "relative_file": str(path.relative_to(root)),
+        }
     return dict(sorted(cases.items()))
 
 
@@ -76,7 +94,7 @@ def parse_selection(
     expression: str | None,
     available: dict[str, dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[str]]:
-    """Parse a selection such as ``a``, ``a,c-f`` or ``a-s``.
+    """Parse a selection such as ``a``, ``a,c-f``, ``a-s`` or ``sd``.
 
     A range may include letters for which no test file exists.  Those letters
     are returned separately so ``a-s`` remains useful with a sparse set of
@@ -87,9 +105,17 @@ def parse_selection(
     if expression is None or not expression.strip() or expression.strip().lower() == "all":
         return list(available.values()), []
 
-    selected_letters: list[str] = []
+    selected_case_ids: list[str] = []
     missing_from_ranges: list[str] = []
     for token in _split_selection(expression.lower()):
+        if token in SPECIAL_CASE_FILES:
+            if token not in available:
+                raise ValueError(
+                    f"no test file found for case {token!r}; use --list to see available cases"
+                )
+            selected_case_ids.append(token)
+            continue
+
         range_match = re.fullmatch(r"([a-s])-([a-s])", token)
         if range_match:
             start, end = range_match.groups()
@@ -98,7 +124,7 @@ def parse_selection(
             letters = LETTERS[ord(start) - ord(LETTER_MIN) : ord(end) - ord(LETTER_MIN) + 1]
             for letter in letters:
                 if letter in available:
-                    selected_letters.append(letter)
+                    selected_case_ids.append(letter)
                 else:
                     missing_from_ranges.append(letter)
             continue
@@ -115,12 +141,12 @@ def parse_selection(
                 raise ValueError(
                     f"no test file found for case {letter!r}; use --list to see available cases"
                 )
-            selected_letters.append(letter)
+            selected_case_ids.append(letter)
 
-    selected_letters = list(dict.fromkeys(selected_letters))
-    if not selected_letters:
+    selected_case_ids = list(dict.fromkeys(selected_case_ids))
+    if not selected_case_ids:
         raise ValueError("the selection does not contain an available test case")
-    return [available[letter] for letter in selected_letters], list(dict.fromkeys(missing_from_ranges))
+    return [available[case_id] for case_id in selected_case_ids], list(dict.fromkeys(missing_from_ranges))
 
 
 def _now() -> datetime:
@@ -187,7 +213,8 @@ def _metadata(
         "run_id": run_id,
         "started_at": _timestamp(),
         "selection": expression or "all",
-        "selected_letters": [case["letter"] for case in selected],
+        "selected_cases": [case["letter"] for case in selected],
+        "selected_letters": [case["letter"] for case in selected if len(case["letter"]) == 1],
         "selected_files": [case["relative_file"] for case in selected],
         "missing_letters_in_ranges": missing_letters,
         "root": str(ROOT),
@@ -207,10 +234,12 @@ def _metadata(
                 "TORCH_HOME",
                 "CUDA_VISIBLE_DEVICES",
                 "ASCEND_VISIBLE_DEVICES",
+                "TORCH_LOGS",
             )
             if os.environ.get(key)
         },
     }
+    metadata["environment"]["TORCH_LOGS"] = os.environ.get("TORCH_LOGS", "recompiles")
     try:
         import importlib.metadata
 
@@ -346,6 +375,7 @@ def _run_one(
             "PYTHONUNBUFFERED": "1",
         }
     )
+    env.setdefault("TORCH_LOGS", "recompiles")
     started_at = _now()
     monotonic_start = time.monotonic()
     timed_out = False
@@ -425,8 +455,8 @@ def _run_one(
 
 def _format_case_list(cases: dict[str, dict[str, Any]]) -> str:
     if not cases:
-        return "(no a-s test files found)"
-    return "\n".join(f"{letter}\t{case['relative_file']}" for letter, case in cases.items())
+        return "(no test cases found)"
+    return "\n".join(f"{case_id}\t{case['relative_file']}" for case_id, case in cases.items())
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -435,7 +465,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "selection",
         nargs="?",
         metavar="CASES",
-        help="letters/ranges, for example a, a,c-f, or a-s; default: all available cases",
+        help="case IDs/ranges, for example a, a,c-f, a-s, or sd; default: all available cases",
     )
     parser.add_argument(
         "--cases",
@@ -444,14 +474,14 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         dest="case_option",
         help="same as the positional CASES argument",
     )
-    parser.add_argument("--list", action="store_true", help="list available a-s test files and exit")
+    parser.add_argument("--list", action="store_true", help="list available test cases and exit")
     parser.add_argument("--output-root", type=Path, default=RUN_ROOT, help="root for timestamped run directories")
     parser.add_argument("--run-id", help="explicit run directory name; default: YYYYmmdd_HHMMSS")
     parser.add_argument(
         "--timeout",
         type=int,
         default=3600,
-        help="timeout per letter in seconds (default: 3600)",
+        help="timeout per case in seconds (default: 3600)",
     )
     parser.add_argument("--stop-on-failure", action="store_true", help="stop after the first FAIL/TIMEOUT")
     parser.add_argument("--no-report", action="store_true", help="do not generate REPORT.md/REPORT.json")

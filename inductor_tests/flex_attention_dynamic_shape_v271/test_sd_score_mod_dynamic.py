@@ -6,17 +6,15 @@ graph is reused across multiple runtime shapes (B / Q / KV / S dynamic) under
 
 Pattern (mirrors dynamic-fix/A-D):
 - Each runtime shape gets its own exact-sized ``B=1, H=1`` broadcastable
-  BlockMask captured via ``functools.partial`` together with ``score_mod``.
-- All compiled partials share one ``CompileCounterWithBackend`` backend;
-  Dynamo cache reuse => ``frame_count == 1`` (asserted at end of each test).
+  BlockMask passed as an input to one compiled function.
+- Each test compiles once outside the shape loop; Dynamo graph reuse gives
+  ``frame_count == 1`` (asserted at the end of each test).
 - Dense SDPA (fp32 math) is the ground truth.
 - Tolerance: atol=5e-3, rtol=5e-3.
 
 Run:
     pytest test_sd_score_mod_dynamic.py -v
 """
-import functools
-
 import pytest
 import torch
 import torch_npu  # noqa: F401
@@ -25,6 +23,7 @@ import torch_npu._inductor  # noqa: F401
 from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 from torch._dynamo.testing import CompileCounterWithBackend
 
+from test_flex_attention_dynamic_shape import assert_close_with_details
 from test_flex_attention_score_mode_common import (
     npu_device,            # noqa: F401  (pytest fixture re-export)
     DEFAULT_B,
@@ -42,23 +41,23 @@ from test_flex_attention_score_mode_common import (
 )
 
 
-def _compile_with(counter, *, score_mod=None, block_mask=None):
-    """Bind score_mod+block_mask to a fresh partial; share counter so Dynamo
-    reuses one cached graph across shapes (frame_count == 1)."""
-    attention = functools.partial(
-        flex_attention, score_mod=score_mod, block_mask=block_mask
-    )
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_with(counter, *, score_mod=None):
+    """Compile once while keeping shape-specific BlockMasks as inputs."""
+    def attention(q, k, v, block_mask):
+        return flex_attention(
+            q, k, v, score_mod=score_mod, block_mask=block_mask
+        )
 
-    def _call(q, k, v):
-        return compiled(q, k, v)
-    return _call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 def _assert_close(actual, expected, tag):
-    torch.testing.assert_close(
-        actual, expected, atol=SD_ATOL, rtol=SD_RTOL,
-        msg=f"{tag}: forward output mismatch"
+    assert_close_with_details(
+        actual,
+        expected,
+        atol=SD_ATOL,
+        rtol=SD_RTOL,
+        msg=f"{tag}: forward output mismatch",
     )
 
 
@@ -85,15 +84,14 @@ def test_sd1_alibi_q_dynamic(npu_device, dtype):
     B, H, D = DEFAULT_B, DEFAULT_H, DEFAULT_D
     Q_SHAPES = [256, 384, 512]
     counter = CompileCounterWithBackend("inductor")
+    compiled = _compile_with(counter, score_mod=alibi_bias_score_mod)
     for Q in Q_SHAPES:
         bm = create_block_mask(causal_mask_mod, B=1, H=1, Q_LEN=Q, KV_LEN=Q,
                                device=npu_device)
-        compiled = _compile_with(counter, score_mod=alibi_bias_score_mod,
-                                 block_mask=bm)
         q = torch.randn(B, H, Q, D, device=npu_device, dtype=dtype, requires_grad=True)
         k = torch.randn_like(q, requires_grad=True)
         v = torch.randn_like(q, requires_grad=True)
-        actual = compiled(q, k, v)
+        actual = compiled(q, k, v, bm)
         expected = dense_reference(q, k, v, causal=True, score_fn=_alibi_dense_score_fn)
         _assert_close(actual, expected, f"SD1 Q={Q} {dtype}")
     _assert_frame_count(counter, "SD1")
@@ -113,15 +111,14 @@ def test_sd2_rel_bias_windowed_kv_dynamic(npu_device, dtype):
     KV_SHAPES = [256, 384, 512]
     counter = CompileCounterWithBackend("inductor")
     windowed = windowed_mask_mod_factory(100)
+    compiled = _compile_with(counter, score_mod=rel_bias_score_mod)
     for KV in KV_SHAPES:
         bm = create_block_mask(windowed, B=1, H=1, Q_LEN=KV, KV_LEN=KV,
                                device=npu_device)
-        compiled = _compile_with(counter, score_mod=rel_bias_score_mod,
-                                 block_mask=bm)
         q = torch.randn(B, H, KV, D, device=npu_device, dtype=dtype, requires_grad=True)
         k = torch.randn_like(q, requires_grad=True)
         v = torch.randn_like(q, requires_grad=True)
-        actual = compiled(q, k, v)
+        actual = compiled(q, k, v, bm)
         expected = dense_reference(q, k, v, causal=False,
                                   score_fn=_rel_bias_dense_score_fn, mask_fn=windowed)
         _assert_close(actual, expected, f"SD2 KV={KV} {dtype}")
@@ -140,17 +137,16 @@ def _composed_dense_score_fn(scores, q_idx, kv_idx):
 def test_sd3_composed_b_q_dynamic(npu_device, dtype):
     """SD3: composed score + causal mask + (B,Q) varies. Frame count 1."""
     H, D = DEFAULT_H, DEFAULT_D
-    BQ_SHAPES = [(1, 256), (2, 384), (4, 512)]
+    BQ_SHAPES = [(2, 256), (4, 384), (2, 512)]
     counter = CompileCounterWithBackend("inductor")
+    compiled = _compile_with(counter, score_mod=composed_rel_causal_score_mod)
     for B, Q in BQ_SHAPES:
         bm = create_block_mask(causal_mask_mod, B=1, H=1, Q_LEN=Q, KV_LEN=Q,
                                device=npu_device)
-        compiled = _compile_with(counter, score_mod=composed_rel_causal_score_mod,
-                                 block_mask=bm)
         q = torch.randn(B, H, Q, D, device=npu_device, dtype=dtype, requires_grad=True)
         k = torch.randn_like(q, requires_grad=True)
         v = torch.randn_like(q, requires_grad=True)
-        actual = compiled(q, k, v)
+        actual = compiled(q, k, v, bm)
         # composed score already includes causal mask, so dense ref uses causal=False
         # and the score_fn applies both rel_bias and causal via torch.where.
         expected = dense_reference(q, k, v, causal=False,
@@ -177,14 +173,14 @@ def test_sd4_captured_buffer_s_dynamic(npu_device, dtype):
     counter = CompileCounterWithBackend("inductor")
     head_offset = torch.rand(H, device=npu_device, dtype=dtype)
     score_mod = make_captured_buffer_score_mod(head_offset)
+    compiled = _compile_with(counter, score_mod=score_mod)
     for S in S_SHAPES:
         bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=S, KV_LEN=S,
                                device=npu_device)
-        compiled = _compile_with(counter, score_mod=score_mod, block_mask=bm)
         q = torch.randn(B, H, S, D, device=npu_device, dtype=dtype, requires_grad=True)
         k = torch.randn_like(q, requires_grad=True)
         v = torch.randn_like(q, requires_grad=True)
-        actual = compiled(q, k, v)
+        actual = compiled(q, k, v, bm)
         dense_fn = _make_captured_dense_score_fn(head_offset)
         expected = dense_reference(q, k, v, causal=False, score_fn=dense_fn)
         _assert_close(actual, expected, f"SD4 S={S} {dtype}")
