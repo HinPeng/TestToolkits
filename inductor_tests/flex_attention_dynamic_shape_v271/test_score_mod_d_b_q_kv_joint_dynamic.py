@@ -34,6 +34,7 @@ from test_score_mod_dynamic_common import (
     dense_reference,
     compile_flex_with,
     assert_close,
+    assert_close_with_details,
     assert_frame_count,
     assert_grad_finite,
     _get_head_offset,
@@ -117,17 +118,17 @@ def test_d_b_q_kv_joint_dynamic(npu_device, dtype, score_mod_name):
         expected_ref.backward(grad_out)
         # Mirror base/test_flex_attention.py: compare grads on CPU to avoid
         # NPU-side subtle numerical differences leaking into assert_close.
-        torch.testing.assert_close(
+        assert_close_with_details(
             compiled_q_grad.cpu(), q_ref.grad.cpu(), atol=SD_ATOL, rtol=SD_RTOL,
-            msg=f"D {score_mod_name} B={B} Q={Q} KV={KV} q_grad {dtype}"
+            tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} q_grad {dtype}",
         )
-        torch.testing.assert_close(
+        assert_close_with_details(
             compiled_k_grad.cpu(), k_ref.grad.cpu(), atol=SD_ATOL, rtol=SD_RTOL,
-            msg=f"D {score_mod_name} B={B} Q={Q} KV={KV} k_grad {dtype}"
+            tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} k_grad {dtype}",
         )
-        torch.testing.assert_close(
+        assert_close_with_details(
             compiled_v_grad.cpu(), v_ref.grad.cpu(), atol=SD_ATOL, rtol=SD_RTOL,
-            msg=f"D {score_mod_name} B={B} Q={Q} KV={KV} v_grad {dtype}"
+            tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} v_grad {dtype}",
         )
 
     assert_frame_count(counter, f"D {score_mod_name}")

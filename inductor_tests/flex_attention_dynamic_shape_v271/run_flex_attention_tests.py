@@ -8,6 +8,7 @@ Examples::
     python run_flex_attention_tests.py --cases a,c-f
     python run_flex_attention_tests.py a-s --timeout 3600
     python run_flex_attention_tests.py sd
+    python run_flex_attention_tests.py score_mod_a
     python run_flex_attention_tests.py --cases a-s,sd
 
 Each selected case is executed in a fresh pytest process.  A timestamped
@@ -44,6 +45,10 @@ LETTERS = tuple(chr(code) for code in range(ord(LETTER_MIN), ord(LETTER_MAX) + 1
 CASE_FILE_RE = re.compile(r"^test_flex_attention_([a-s])_(.+)\.py$")
 SPECIAL_CASE_FILES = {
     "sd": "test_sd_score_mod_dynamic.py",
+    "score_mod_a": "test_score_mod_a_batch_dynamic.py",
+    "score_mod_b": "test_score_mod_b_q_len_dynamic.py",
+    "score_mod_c": "test_score_mod_c_kv_len_dynamic.py",
+    "score_mod_d": "test_score_mod_d_b_q_kv_joint_dynamic.py",
 }
 
 
@@ -94,7 +99,7 @@ def parse_selection(
     expression: str | None,
     available: dict[str, dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], list[str]]:
-    """Parse a selection such as ``a``, ``a,c-f``, ``a-s`` or ``sd``.
+    """Parse a selection such as ``a``, ``a,c-f``, ``a-s`` or special cases.
 
     A range may include letters for which no test file exists.  Those letters
     are returned separately so ``a-s`` remains useful with a sparse set of
@@ -465,7 +470,10 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "selection",
         nargs="?",
         metavar="CASES",
-        help="case IDs/ranges, for example a, a,c-f, a-s, or sd; default: all available cases",
+        help=(
+            "case IDs/ranges, for example a, a,c-f, a-s, sd, or score_mod_a; "
+            "default: all available cases"
+        ),
     )
     parser.add_argument(
         "--cases",

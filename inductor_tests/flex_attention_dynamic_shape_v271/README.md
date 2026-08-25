@@ -14,7 +14,15 @@ python run_flex_attention_tests.py --cases a,c,f
 
 # 运行 a-s 范围内所有实际存在的用例
 python run_flex_attention_tests.py a-s
+
+# 运行 score_mod 动态 Shape 用例（A/B/C/D）
+python run_flex_attention_tests.py score_mod_a
+python run_flex_attention_tests.py --cases score_mod_a,score_mod_b,score_mod_c,score_mod_d
 ```
+
+`score_mod_a` 到 `score_mod_d` 是显式注册的 special case，分别对应
+`test_score_mod_a_batch_dynamic.py` 到 `test_score_mod_d_b_q_kv_joint_dynamic.py`；
+它们也会出现在 `--list` 输出中，并参与不带选择参数时的默认运行。
 
 每次运行会在 `flex_attention_test_runs/YYYYmmdd_HHMMSS/` 下生成批次目录：
 
