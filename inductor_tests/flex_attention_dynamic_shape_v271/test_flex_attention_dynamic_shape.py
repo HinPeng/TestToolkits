@@ -202,6 +202,24 @@ GRAD_ATOL = 8e-2
 GRAD_RTOL = 8e-2
 
 
+def assert_close_with_details(actual, expected, *, atol, rtol, msg=None, **kwargs):
+    """Keep PyTorch mismatch statistics while adding test-case context.
+
+    Passing ``msg=`` directly to ``torch.testing.assert_close`` replaces its
+    useful default text in some supported PyTorch versions. Calling it without
+    ``msg`` first preserves details such as mismatched element count, greatest
+    absolute difference, and greatest relative difference; the case label is
+    then prepended only when the comparison fails.
+    """
+
+    try:
+        torch.testing.assert_close(actual, expected, atol=atol, rtol=rtol, **kwargs)
+    except AssertionError as exc:
+        if not msg:
+            raise
+        raise AssertionError(f"{msg}\n{exc}") from exc
+
+
 def _dense_reference(q, k, v, *, causal, score_fn, mask_fn=None):
     q_len = q.shape[-2]
     kv_len = k.shape[-2]
@@ -228,7 +246,13 @@ def _check_one_shape(compiled, q, k, v, block_mask, *, causal_ref, tag, score_fn
 
     if q.shape[-2] * k.shape[-2] <= 1024 * 1024:
         expected = _dense_reference(q, k, v, causal=causal_ref, score_fn=score_fn)
-        torch.testing.assert_close(actual, expected, atol=8e-2, rtol=8e-2)
+        assert_close_with_details(
+            actual,
+            expected,
+            atol=8e-2,
+            rtol=8e-2,
+            msg=tag,
+        )
 
     actual.float().sum().backward()
     for tensor, name in ((q, "q"), (k, "k"), (v, "v")):

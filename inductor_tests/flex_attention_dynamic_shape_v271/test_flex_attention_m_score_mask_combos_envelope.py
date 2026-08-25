@@ -24,6 +24,7 @@ from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
+    assert_close_with_details,
     npu_device,          # noqa: F401  (pytest fixture re-export)
     _COMBO_SCORE_MODS,
     _COMBO_MASK_MODS,
@@ -84,14 +85,18 @@ class TestScoreMaskCombosEnvelope:
 
             atol, rtol = 1e-2, 1e-2
             tag = f"{score_mod_name} x {mask_mod_name} @ S={S}"
-            torch.testing.assert_close(comp_out, ref_out, atol=atol, rtol=rtol,
-                                       msg=f"Fwd mismatch: {tag}")
-            torch.testing.assert_close(q.grad, ref_q_grad, atol=atol, rtol=rtol,
-                                       msg=f"q.grad mismatch: {tag}")
-            torch.testing.assert_close(k.grad, ref_k_grad, atol=atol, rtol=rtol,
-                                       msg=f"k.grad mismatch: {tag}")
-            torch.testing.assert_close(v.grad, ref_v_grad, atol=atol, rtol=rtol,
-                                       msg=f"v.grad mismatch: {tag}")
+            assert_close_with_details(
+                comp_out, ref_out, atol=atol, rtol=rtol, msg=f"Fwd mismatch: {tag}"
+            )
+            assert_close_with_details(
+                q.grad, ref_q_grad, atol=atol, rtol=rtol, msg=f"q.grad mismatch: {tag}"
+            )
+            assert_close_with_details(
+                k.grad, ref_k_grad, atol=atol, rtol=rtol, msg=f"k.grad mismatch: {tag}"
+            )
+            assert_close_with_details(
+                v.grad, ref_v_grad, atol=atol, rtol=rtol, msg=f"v.grad mismatch: {tag}"
+            )
             q.grad = k.grad = v.grad = None
 
         assert counter.frame_count == 1, (
@@ -131,4 +136,10 @@ class TestScoreMaskCombosEnvelope:
         comp_out.backward(grad_out)
 
         # These assertions are expected to fail (NaN)
-        torch.testing.assert_close(comp_out, ref_out, atol=1e-2, rtol=1e-2)
+        assert_close_with_details(
+            comp_out,
+            ref_out,
+            atol=1e-2,
+            rtol=1e-2,
+            msg=f"expected failure: {score_mod_name} x {mask_mod_name} @ S={S}",
+        )

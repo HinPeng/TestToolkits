@@ -18,6 +18,7 @@ from torch.nn.attention.flex_attention import flex_attention, create_block_mask,
 from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
+    assert_close_with_details,
     npu_device,          # noqa: F401  (pytest fixture re-export)
     _base_identity_score_mod,
     _base_causal_mask_mod,
@@ -66,14 +67,19 @@ class TestReturnLseEnvelope:
 
             comp_out, comp_lse = compiled(q, k, v, bm)
 
-            out_diff = torch.max(torch.abs(ref_out - comp_out)).item()
-            assert out_diff < 1e-2, f"Output mismatch @ S={S}: max_diff={out_diff}"
-
-            lse_aligned = torch.allclose(ref_lse, comp_lse, atol=0.01, rtol=0.01)
-            assert lse_aligned, (
-                f"LSE offset bug @ S={S}: "
-                f"mean_diff={(ref_lse - comp_lse).mean().item():.4f}, "
-                f"std_diff={(ref_lse - comp_lse).std().item():.4f}"
+            assert_close_with_details(
+                comp_out,
+                ref_out,
+                atol=1e-2,
+                rtol=1e-2,
+                msg=f"Output mismatch @ S={S}",
+            )
+            assert_close_with_details(
+                comp_lse,
+                ref_lse,
+                atol=0.01,
+                rtol=0.01,
+                msg=f"LSE mismatch @ S={S}",
             )
 
         assert counter.frame_count == 1, (
@@ -106,11 +112,20 @@ class TestReturnLseEnvelope:
 
             comp_out, comp_lse = compiled(q, k, v, bm)
 
-            out_diff = torch.max(torch.abs(ref_out - comp_out)).item()
-            assert out_diff < 1e-2, f"Output mismatch @ S={S}: max_diff={out_diff}"
-
-            lse_aligned = torch.allclose(ref_lse, comp_lse, atol=0.01, rtol=0.01)
-            assert lse_aligned, f"LSE mismatch under causal mask @ S={S}"
+            assert_close_with_details(
+                comp_out,
+                ref_out,
+                atol=1e-2,
+                rtol=1e-2,
+                msg=f"Output mismatch under causal mask @ S={S}",
+            )
+            assert_close_with_details(
+                comp_lse,
+                ref_lse,
+                atol=0.01,
+                rtol=0.01,
+                msg=f"LSE mismatch under causal mask @ S={S}",
+            )
 
         assert counter.frame_count == 1, (
             f"Expected 1 compile across exact causal masks, got {counter.frame_count}"

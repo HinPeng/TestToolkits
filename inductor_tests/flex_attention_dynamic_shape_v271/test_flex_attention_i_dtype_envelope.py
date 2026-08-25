@@ -21,6 +21,7 @@ from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
+    assert_close_with_details,
     npu_device,          # noqa: F401  (pytest fixture re-export)
     _causal_mask,
     _dense_reference,
@@ -50,9 +51,9 @@ def _check_dtype_shape(compiled, q, k, v, bm, *, atol, rtol, tag):
     actual = compiled(q, k, v, bm)
     actual_grads = torch.autograd.grad(actual.sum(), (q, k, v))
 
-    torch.testing.assert_close(actual, expected, atol=atol, rtol=rtol, msg=tag)
+    assert_close_with_details(actual, expected, atol=atol, rtol=rtol, msg=tag)
     for i, name in enumerate(("q", "k", "v")):
-        torch.testing.assert_close(
+        assert_close_with_details(
             actual_grads[i], expected_grads[i],
             atol=atol * 4, rtol=rtol * 4,
             msg=f"{name}.grad mismatch at {tag}",

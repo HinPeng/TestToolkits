@@ -20,6 +20,7 @@ from torch.nn.attention.flex_attention import flex_attention, create_block_mask,
 from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
+    assert_close_with_details,
     npu_device,          # noqa: F401  (pytest fixture re-export)
     _dense_reference,
     FWD_ATOL,
@@ -40,7 +41,7 @@ def _check_large_shape(compiled, q, k, v, bm, tag):
     """Compiled output vs dense SDPA reference (no flex_attention self-compare)."""
     expected = _dense_reference(q, k, v, causal=False, score_fn=None)
     actual = compiled(q, k, v, bm)
-    torch.testing.assert_close(actual, expected, atol=FWD_ATOL, rtol=FWD_RTOL, msg=tag)
+    assert_close_with_details(actual, expected, atol=FWD_ATOL, rtol=FWD_RTOL, msg=tag)
 
 
 class TestLargeLengthEnvelope:

@@ -20,6 +20,7 @@ from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
+    assert_close_with_details,
     npu_device,          # noqa: F401  (pytest fixture re-export)
     _base_causal_mask_mod,
     _remainder_mask_mod,
@@ -74,11 +75,17 @@ def _run_mask_envelope(npu_device, mask_mod, *, score_mod=None, with_backward=Fa
         if with_backward:
             comp_out.backward(grad_out)
 
-        torch.testing.assert_close(comp_out, ref_out, atol=1e-2, rtol=1e-2,
-                                   msg=f"fwd mismatch @ S={S}")
+        assert_close_with_details(
+            comp_out, ref_out, atol=1e-2, rtol=1e-2, msg=f"fwd mismatch @ S={S}"
+        )
         if with_backward:
-            torch.testing.assert_close(q.grad, ref_q_grad, atol=1e-2, rtol=1e-2,
-                                       msg=f"q.grad mismatch @ S={S}")
+            assert_close_with_details(
+                q.grad,
+                ref_q_grad,
+                atol=1e-2,
+                rtol=1e-2,
+                msg=f"q.grad mismatch @ S={S}",
+            )
             q.grad = k.grad = v.grad = None
 
     assert counter.frame_count == 1, (
@@ -103,7 +110,10 @@ class TestRemainderEnvelope:
         ref_out = op_fn(q, k, v)
         compiled_fn = torch.compile(op_fn, backend="inductor", dynamic=True)
         comp_out = compiled_fn(q, k, v)
-        torch.testing.assert_close(comp_out, ref_out, atol=1e-2, rtol=1e-2)
+        assert_close_with_details(
+            comp_out, ref_out, atol=1e-2, rtol=1e-2,
+            msg="remainder in mask_mod @ S=256",
+        )
 
     def test_remainder_in_score_mod_passes(self, npu_device):
         """N2: % in score_mod works fine, exact masks, fwd+bwd."""
@@ -128,7 +138,10 @@ class TestRemainderEnvelope:
         ref_out = op_fn(q, k, v)
         compiled_fn = torch.compile(op_fn, backend="inductor", dynamic=True)
         comp_out = compiled_fn(q, k, v)
-        torch.testing.assert_close(comp_out, ref_out, atol=1e-2, rtol=1e-2)
+        assert_close_with_details(
+            comp_out, ref_out, atol=1e-2, rtol=1e-2,
+            msg="remainder divisor=3 @ S=256",
+        )
 
     def test_remainder_boolean_comparison(self, npu_device):
         """N4b: % with an explicit boolean comparison works (single shape)."""
@@ -144,7 +157,10 @@ class TestRemainderEnvelope:
         ref_out = op_fn(q, k, v)
         compiled_fn = torch.compile(op_fn, backend="inductor", dynamic=True)
         comp_out = compiled_fn(q, k, v)
-        torch.testing.assert_close(comp_out, ref_out, atol=1e-2, rtol=1e-2)
+        assert_close_with_details(
+            comp_out, ref_out, atol=1e-2, rtol=1e-2,
+            msg="bitwise_and in mask_mod @ S=256",
+        )
 
     def test_remainder_equivalent_form(self, npu_device):
         """N5: h - (h // 2) * 2 works (no % operator), exact masks."""

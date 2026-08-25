@@ -22,6 +22,7 @@ from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
+    assert_close_with_details,
     npu_device,          # noqa: F401  (pytest fixture re-export)
     _BASE_SCORE_MODS,
     _BASE_MASK_MODS,
@@ -85,10 +86,16 @@ class TestBaseMatrixEnvelope:
             # Use same loose tolerance as base test (1e-1)
             atol, rtol = 1e-1, 0.0
             shape_tag = f"{B}x{H}x{S}x{D}"
-            torch.testing.assert_close(
+            assert_close_with_details(
                 compiled_out, eager_out, atol=atol, rtol=rtol,
                 msg=f"fwd mismatch {score_mod_name}/{mask_mod_name}/{dtype} @ {shape_tag}")
-            torch.testing.assert_close(q.grad, eager_q_grad, atol=atol, rtol=rtol)
-            torch.testing.assert_close(k.grad, eager_k_grad, atol=atol, rtol=rtol)
-            torch.testing.assert_close(v.grad, eager_v_grad, atol=atol, rtol=rtol)
+            assert_close_with_details(
+                q.grad, eager_q_grad, atol=atol, rtol=rtol,
+                msg=f"q.grad mismatch {score_mod_name}/{mask_mod_name}/{dtype} @ {shape_tag}")
+            assert_close_with_details(
+                k.grad, eager_k_grad, atol=atol, rtol=rtol,
+                msg=f"k.grad mismatch {score_mod_name}/{mask_mod_name}/{dtype} @ {shape_tag}")
+            assert_close_with_details(
+                v.grad, eager_v_grad, atol=atol, rtol=rtol,
+                msg=f"v.grad mismatch {score_mod_name}/{mask_mod_name}/{dtype} @ {shape_tag}")
             q.grad = k.grad = v.grad = None

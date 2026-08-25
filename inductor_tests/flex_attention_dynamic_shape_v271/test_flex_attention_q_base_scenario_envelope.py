@@ -25,6 +25,7 @@ from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
+    assert_close_with_details,
     npu_device,          # noqa: F401  (pytest fixture re-export)
     _BASE_SCORE_MODS,
     _BASE_MASK_MODS,
@@ -96,8 +97,13 @@ class TestBaseScenarioEnvelope:
             ref = _dense_ref_for(q, k, v, score_mod, mask_mod)
 
             out = compiled(q, k, v, bm)
-            torch.testing.assert_close(out, ref, atol=5e-3, rtol=5e-3,
-                                       msg=f"{score_mod_name} x {mask_mod_name} @ B={B},S={S}")
+            assert_close_with_details(
+                out,
+                ref,
+                atol=5e-3,
+                rtol=5e-3,
+                msg=f"{score_mod_name} x {mask_mod_name} @ B={B},S={S}",
+            )
 
         assert counter.frame_count == 1, (
             f"{score_mod_name} x {mask_mod_name}: expected 1 compile across exact masks, "

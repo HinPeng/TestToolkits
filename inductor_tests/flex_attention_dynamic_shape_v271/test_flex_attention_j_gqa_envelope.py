@@ -23,6 +23,7 @@ from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 from torch._dynamo.testing import CompileCounterWithBackend
 
 from test_flex_attention_dynamic_shape import (
+    assert_close_with_details,
     npu_device,          # noqa: F401  (pytest fixture re-export)
     _causal_mask,
     _dense_reference,
@@ -55,10 +56,15 @@ def _check_gqa_shape(compiled, q, k, v, bm, tag):
     actual = compiled(q, k, v, bm)
     actual_grads = torch.autograd.grad(actual.sum(), (q, k, v))
 
-    torch.testing.assert_close(actual, expected, atol=FWD_ATOL, rtol=FWD_RTOL, msg=tag)
+    assert_close_with_details(actual, expected, atol=FWD_ATOL, rtol=FWD_RTOL, msg=tag)
     # q grad direct comparison (same usage as the original J1)
-    torch.testing.assert_close(actual_grads[0], expected_grads[0],
-                               atol=GRAD_ATOL, rtol=GRAD_RTOL, msg=tag)
+    assert_close_with_details(
+        actual_grads[0],
+        expected_grads[0],
+        atol=GRAD_ATOL,
+        rtol=GRAD_RTOL,
+        msg=f"q.grad mismatch at {tag}",
+    )
 
 
 class TestGQAEnvelope:
