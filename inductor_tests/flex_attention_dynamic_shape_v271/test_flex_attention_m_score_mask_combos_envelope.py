@@ -1,8 +1,9 @@
 """Category M: extended score_mod x mask_mod combos with shape-specific BlockMasks.
 
-Each runtime ``S`` shape gets an exact, broadcastable ``B=1, H=1`` BlockMask
-passed to one compiled function. The graph must be reused across different S
-metadata capacities.
+Each runtime ``S`` shape gets an exact ``B=2, H=8`` BlockMask passed to one
+compiled function. Runtime and eager-reference BlockMasks use identical
+batch/head semantics, including for head-dependent masks. The graph must be
+reused across different S metadata capacities.
 
 The eager reference is computed per shape with an EXACT-SIZED BlockMask, so
 the reference side never relies on envelope reuse.
@@ -58,7 +59,7 @@ class TestScoreMaskCombosEnvelope:
         compiled = _compile_flex(counter, score_mod)
 
         for S in _RUNTIME_S:
-            bm = create_block_mask(mask_mod, B=1, H=1, Q_LEN=S, KV_LEN=S,
+            bm = create_block_mask(mask_mod, B=_B, H=_H, Q_LEN=S, KV_LEN=S,
                                    device=npu_device)
             q = torch.randn(_B, _H, S, _D, device=npu_device, dtype=torch.float32,
                             requires_grad=True)
