@@ -25,8 +25,10 @@ results.json            # 每个字母的机器可读结果
 REPORT.md               # Markdown 报告
 REPORT.json             # JSON 报告
 a/run.log               # a 用例完整输出
-a/torch_compile_debug/  # 若测试生成
+a/torch_compile_debug/  # 最终调试树：fx_graph、output_code.py 等
 ```
+
+Inductor/Triton 的中间编译 cache 会放在系统临时目录，单个用例结束后自动清理，不会写入 `a/` 等用例目录。
 
 默认每个字母最多运行 3600 秒。可以使用 `--timeout`、`--stop-on-failure` 或 `--output-root` 调整行为。
 

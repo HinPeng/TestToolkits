@@ -9,8 +9,9 @@ Examples::
     python run_flex_attention_tests.py a-s --timeout 3600
 
 Each selected letter is executed in a fresh pytest process.  A timestamped
-run directory contains one log and one cache/debug directory per letter, plus
-JSON and Markdown summaries.
+run directory contains one log and the final ``torch_compile_debug/`` tree per
+letter, plus JSON and Markdown summaries.  Inductor/Triton intermediate caches
+are created outside the run directory and removed after the case finishes.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ import signal
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
@@ -290,19 +292,30 @@ def _status(returncode: int, timed_out: bool, summary: dict[str, int]) -> str:
     return "PASS"
 
 
-def _copy_output_code(case_dir: Path) -> list[str]:
-    """Copy generated output_code files to stable paths in the case folder."""
+def _debug_artifacts(case_dir: Path) -> dict[str, Any]:
+    """Describe final debug files without copying them outside the debug tree."""
 
-    copied: list[str] = []
-    sources = sorted(case_dir.glob("torch_compile_debug/**/output_code.py"))
-    for index, source in enumerate(sources):
-        destination = case_dir / ("output_code.py" if index == 0 else f"output_code_{index}.py")
-        try:
-            shutil.copy2(source, destination)
-        except OSError:
-            continue
-        copied.append(str(destination.relative_to(case_dir)))
-    return copied
+    debug_dir = case_dir / "torch_compile_debug"
+    if not debug_dir.is_dir():
+        return {
+            "directory": None,
+            "file_count": 0,
+            "fx_graph_files": [],
+            "output_code_files": [],
+        }
+
+    files = sorted(path for path in debug_dir.rglob("*") if path.is_file())
+    relative_files = [str(path.relative_to(case_dir)) for path in files]
+    return {
+        "directory": "torch_compile_debug",
+        "file_count": len(relative_files),
+        "fx_graph_files": [
+            path for path in relative_files if Path(path).name.startswith("fx_graph")
+        ],
+        "output_code_files": [
+            path for path in relative_files if Path(path).name == "output_code.py"
+        ],
+    }
 
 
 def _run_one(
@@ -317,14 +330,19 @@ def _run_one(
     log_path = case_dir / "run.log"
     command = [sys.executable, "-m", "pytest", "-v", "-s", str(case["file"])]
     command_text = shlex.join(command)
+    temporary_cache_dir = Path(tempfile.mkdtemp(prefix=f"flex_attn_{letter}_cache_"))
     env = os.environ.copy()
+    python_path = [str(ROOT)]
+    if env.get("PYTHONPATH"):
+        python_path.append(env["PYTHONPATH"])
     env.update(
         {
             "FLEX_ATTN_RUN_DIR": str(run_dir),
             "FLEX_ATTN_CASE_DIR": str(case_dir),
             "TORCH_COMPILE_DEBUG": "1",
-            "TORCHINDUCTOR_CACHE_DIR": str(case_dir / "torchinductor_cache"),
-            "TRITON_CACHE_DIR": str(case_dir / "triton_cache"),
+            "TORCHINDUCTOR_CACHE_DIR": str(temporary_cache_dir / "torchinductor"),
+            "TRITON_CACHE_DIR": str(temporary_cache_dir / "triton"),
+            "PYTHONPATH": os.pathsep.join(python_path),
             "PYTHONUNBUFFERED": "1",
         }
     )
@@ -338,12 +356,13 @@ def _run_one(
         log.write(f"CASE={letter}\n")
         log.write(f"TEST_FILE={case['relative_file']}\n")
         log.write(f"COMMAND={command_text}\n")
+        log.write(f"WORKING_DIRECTORY={case_dir}\n")
         log.write(f"TIMEOUT_SECONDS={timeout_seconds}\n\n")
         log.flush()
         try:
             process = subprocess.Popen(
                 command,
-                cwd=ROOT,
+                cwd=case_dir,
                 env=env,
                 stdout=log,
                 stderr=subprocess.STDOUT,
@@ -363,11 +382,16 @@ def _run_one(
             returncode = 125
         log.flush()
 
+    # Keep only the final torch_compile_debug tree under the case directory.
+    # The large Inductor/Triton intermediate caches live in the system temp
+    # directory and are removed after this case finishes.
+    shutil.rmtree(temporary_cache_dir, ignore_errors=True)
+
     elapsed_seconds = round(time.monotonic() - monotonic_start, 2)
     finished_at = _now()
     log_text = log_path.read_text(encoding="utf-8", errors="replace")
     summary = _pytest_summary(log_text)
-    output_code_files = _copy_output_code(case_dir)
+    debug_artifacts = _debug_artifacts(case_dir)
     status = _status(returncode, timed_out, summary)
     record: dict[str, Any] = {
         "letter": letter,
@@ -382,10 +406,10 @@ def _run_one(
         "elapsed_seconds": elapsed_seconds,
         "command": command,
         "run_log": str(log_path.relative_to(run_dir)),
-        "output_code_files": output_code_files,
+        "debug_artifacts": debug_artifacts,
         "artifacts": [
             name
-            for name in ("torch_compile_debug", "torchinductor_cache", "triton_cache")
+            for name in ("torch_compile_debug",)
             if (case_dir / name).exists()
         ],
         "summary": summary,

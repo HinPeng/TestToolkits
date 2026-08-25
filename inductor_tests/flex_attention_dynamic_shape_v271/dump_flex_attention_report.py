@@ -192,8 +192,9 @@ def build_report(run_dir: Path, records: list[dict[str, Any]]) -> tuple[str, dic
             "",
             "## 产物",
             "",
-            "每个字母的目录中保留 `run.log`、Inductor/Triton cache，以及测试产生的 "
-            "`torch_compile_debug/` 和 `output_code*.py`（如果有）。",
+            "每个字母的目录中只保留 `run.log` 和最终的 `torch_compile_debug/`；"
+            "其中包含 `fx_graph*`、`output_code.py` 等调试产物。Inductor/Triton "
+            "中间 cache 位于系统临时目录，测试结束后会清理。",
             "",
             "## 失败详情",
             "",
