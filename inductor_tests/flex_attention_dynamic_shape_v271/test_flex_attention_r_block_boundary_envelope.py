@@ -2,17 +2,14 @@
 
 128 is the sparse block size; below-128 and above-128 are two logic paths on
 NPU. Each runtime ``(Q, KV)`` shape gets an exact, broadcastable ``B=1, H=1``
-BlockMask captured by ``functools.partial``. All compiled partials share one
-backend and must reuse one graph across different Q/KV metadata capacities
-(including 128-boundary crossings), matching community M01.
+BlockMask passed to one compiled function. The graph must be reused across
+different Q/KV metadata capacities, including 128-boundary crossings.
 
 fwd + dQ/dK/dV checked on every shape against the shared ``_check_one_shape``.
 
 Run:
     pytest test_flex_attention_r_block_boundary_envelope.py -v
 """
-import functools
-
 import torch
 import torch_npu  # noqa: F401
 import torch_npu._inductor  # noqa: F401
@@ -29,14 +26,11 @@ from test_flex_attention_dynamic_shape import (
 _B, _H, _D = 2, 2, 64   # static dims (B=2 to avoid Dynamo 0/1 specialization)
 
 
-def _compile_flex_with_mask(counter, block_mask):
-    attention = functools.partial(flex_attention, block_mask=block_mask)
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_flex(counter):
+    def attention(q, k, v, block_mask):
+        return flex_attention(q, k, v, block_mask=block_mask)
 
-    def call(q, k, v, _unused_block_mask):
-        return compiled(q, k, v)
-
-    return call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 class TestBlockBoundaryEnvelope:
@@ -47,11 +41,11 @@ class TestBlockBoundaryEnvelope:
         Exact masks per shape -> 1 compile.
         """
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for q_len in [100, 127, 128]:
             bm = create_block_mask(_causal_mask, B=1, H=1, Q_LEN=q_len, KV_LEN=256,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, q_len, _D, device=npu_device, dtype=torch.bfloat16,
                             requires_grad=True)
             k = torch.randn(_B, _H, 256, _D, device=npu_device, dtype=torch.bfloat16,
@@ -65,16 +59,19 @@ class TestBlockBoundaryEnvelope:
             f"got {counter.frame_count}"
         )
 
-    def test_r2_q_from_below_to_above_128(self, npu_device):
-        """R2: Q = 64 -> 127 -> 128 -> 129 -> 256, from below-128 region up to
-        capacity 2. Exact masks per shape -> 1 compile.
+    def test_r2_q_capacity_ge2_dynamic(self, npu_device):
+        """R2: Q = 129 -> 256 -> 257 -> 384, covering capacities 2 and 3.
+
+        Capacity 1 is excluded because Dynamo specializes tensor dimensions
+        of size 0/1 as a separate community-defined compile domain. Exact
+        masks per shape -> 1 compile.
         """
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
-        for q_len in [64, 127, 128, 129, 256]:
+        for q_len in [129, 256, 257, 384]:
             bm = create_block_mask(_causal_mask, B=1, H=1, Q_LEN=q_len, KV_LEN=256,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, q_len, _D, device=npu_device, dtype=torch.bfloat16,
                             requires_grad=True)
             k = torch.randn(_B, _H, 256, _D, device=npu_device, dtype=torch.bfloat16,
@@ -84,7 +81,7 @@ class TestBlockBoundaryEnvelope:
                              tag=f"R2 q_len={q_len}")
 
         assert counter.frame_count == 1, (
-            f"Expected 1 compile across Q 128 crossing, "
+            f"Expected 1 compile across Q capacities >= 2, "
             f"got {counter.frame_count}"
         )
 
@@ -93,11 +90,11 @@ class TestBlockBoundaryEnvelope:
         per shape -> 1 compile.
         """
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for kv_len in [64, 127, 128, 129]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=256, KV_LEN=kv_len,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, 256, _D, device=npu_device, dtype=torch.bfloat16,
                             requires_grad=True)
             k = torch.randn(_B, _H, kv_len, _D, device=npu_device, dtype=torch.bfloat16,
@@ -114,11 +111,11 @@ class TestBlockBoundaryEnvelope:
     def test_r4_q_below_kv_above(self, npu_device):
         """R4: below-128 Q with above-128 KV. Exact masks -> 1 compile."""
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for Q, KV in [(32, 128), (64, 512)]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=Q, KV_LEN=KV,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, Q, _D, device=npu_device, dtype=torch.bfloat16,
                             requires_grad=True)
             k = torch.randn(_B, _H, KV, _D, device=npu_device, dtype=torch.bfloat16,
@@ -137,11 +134,11 @@ class TestBlockBoundaryEnvelope:
         -> 1 compile.
         """
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for Q, KV in [(128, 32), (512, 64)]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=Q, KV_LEN=KV,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, Q, _D, device=npu_device, dtype=torch.bfloat16,
                             requires_grad=True)
             k = torch.randn(_B, _H, KV, _D, device=npu_device, dtype=torch.bfloat16,
@@ -160,11 +157,11 @@ class TestBlockBoundaryEnvelope:
         -> 1 compile.
         """
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for Q, KV in [(16, 16), (24, 32), (32, 32)]:
             bm = create_block_mask(_causal_mask, B=1, H=1, Q_LEN=Q, KV_LEN=KV,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, Q, _D, device=npu_device, dtype=torch.bfloat16,
                             requires_grad=True)
             k = torch.randn(_B, _H, KV, _D, device=npu_device, dtype=torch.bfloat16,

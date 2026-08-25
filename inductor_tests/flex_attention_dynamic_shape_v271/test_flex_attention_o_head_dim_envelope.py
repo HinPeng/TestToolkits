@@ -2,18 +2,14 @@
 
 head_dim stays parametrized (it configures the kernel tile and is not a
 dynamic sequence dim); within each head_dim, each runtime ``S`` shape gets
-an exact, broadcastable ``B=1, H=1`` BlockMask captured by
-``functools.partial``. All compiled partials share one backend and must
-reuse one graph across different S metadata capacities, matching community
-M01.
+an exact, broadcastable ``B=1, H=1`` BlockMask passed to one compiled
+function. The graph must be reused across different S metadata capacities.
 
 The eager reference is computed per shape with an EXACT-SIZED BlockMask.
 
 Run:
     pytest test_flex_attention_o_head_dim_envelope.py -v
 """
-import functools
-
 import pytest
 import torch
 import torch_npu  # noqa: F401
@@ -31,14 +27,11 @@ _B, _H = 2, 8
 _RUNTIME_S = [128, 192, 256]
 
 
-def _compile_flex_with_mask(counter, block_mask):
-    attention = functools.partial(flex_attention, block_mask=block_mask)
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_flex(counter):
+    def attention(q, k, v, block_mask):
+        return flex_attention(q, k, v, block_mask=block_mask)
 
-    def call(q, k, v, _unused_block_mask):
-        return compiled(q, k, v)
-
-    return call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 class TestHeadDimEnvelope:
@@ -50,11 +43,11 @@ class TestHeadDimEnvelope:
         dtype = torch.float32
 
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for S in _RUNTIME_S:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=S, KV_LEN=S,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, S, head_dim, device=npu_device, dtype=dtype)
             k = torch.randn(_B, _H, S, head_dim, device=npu_device, dtype=dtype)
             v = torch.randn(_B, _H, S, head_dim, device=npu_device, dtype=dtype)

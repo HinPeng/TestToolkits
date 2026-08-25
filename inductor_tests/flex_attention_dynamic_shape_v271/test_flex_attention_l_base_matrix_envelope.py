@@ -4,8 +4,8 @@ score_mod (identity/causal/rel_bias) x mask_mod (noop/causal) x dtype
 (fp16/fp32/bf16) = 18 combos, forward + backward.
 
 Each runtime ``(B, S)`` shape gets an exact, broadcastable ``B=1, H=1``
-BlockMask captured by ``functools.partial`` (together with ``score_mod``).
-The eager reference is computed per shape with an exact-sized BlockMask;
+BlockMask passed to one compiled function. The eager reference is computed
+per shape with an exact-sized BlockMask;
 fwd + dQ/dK/dV are verified against it. No ``frame_count`` assertion is
 made here (per-shape ``compiled`` + counter interaction is unreliable on
 NPU), matching A/B/C/D's "numerical-only" style.
@@ -13,8 +13,6 @@ NPU), matching A/B/C/D's "numerical-only" style.
 Run:
     pytest test_flex_attention_l_base_matrix_envelope.py -v
 """
-import functools
-
 import pytest
 import torch
 import torch_npu  # noqa: F401
@@ -31,18 +29,11 @@ from test_flex_attention_dynamic_shape import (
 )
 
 
-def _compile_flex_with_mask(counter, block_mask, score_mod=None):
-    attention = functools.partial(
-        flex_attention,
-        score_mod=score_mod,
-        block_mask=block_mask,
-    )
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_flex(counter, score_mod=None):
+    def attention(q, k, v, block_mask):
+        return flex_attention(q, k, v, score_mod=score_mod, block_mask=block_mask)
 
-    def call(q, k, v, _unused_block_mask):
-        return compiled(q, k, v)
-
-    return call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 class TestBaseMatrixEnvelope:
@@ -68,11 +59,11 @@ class TestBaseMatrixEnvelope:
         score_mod = _BASE_SCORE_MODS[score_mod_name]
         mask_mod = _BASE_MASK_MODS[mask_mod_name]
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter, score_mod)
 
         for (B, H, S, D) in self._L_FAMILY_H4 + self._L_FAMILY_H8:
             bm = create_block_mask(mask_mod, B=1, H=1, Q_LEN=S, KV_LEN=S,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm, score_mod)
             q = torch.randn(B, H, S, D, device=npu_device, dtype=dtype, requires_grad=True)
             k = torch.randn(B, H, S, D, device=npu_device, dtype=dtype, requires_grad=True)
             v = torch.randn(B, H, S, D, device=npu_device, dtype=dtype, requires_grad=True)

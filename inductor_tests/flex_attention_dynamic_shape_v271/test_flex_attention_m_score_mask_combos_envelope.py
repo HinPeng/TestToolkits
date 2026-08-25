@@ -1,9 +1,8 @@
 """Category M: extended score_mod x mask_mod combos with shape-specific BlockMasks.
 
 Each runtime ``S`` shape gets an exact, broadcastable ``B=1, H=1`` BlockMask
-captured by ``functools.partial`` (together with ``score_mod``). All compiled
-partials share one backend and must reuse one graph across different S
-metadata capacities, matching community M01.
+passed to one compiled function. The graph must be reused across different S
+metadata capacities.
 
 The eager reference is computed per shape with an EXACT-SIZED BlockMask, so
 the reference side never relies on envelope reuse.
@@ -15,8 +14,6 @@ compiled call.
 Run:
     pytest test_flex_attention_m_score_mask_combos_envelope.py -v
 """
-import functools
-
 import pytest
 import torch
 import torch_npu  # noqa: F401
@@ -37,18 +34,11 @@ _B, _H, _D = 2, 8, 64
 _RUNTIME_S = [256, 384, 512]
 
 
-def _compile_flex_with_mask(counter, block_mask, score_mod=None):
-    attention = functools.partial(
-        flex_attention,
-        score_mod=score_mod,
-        block_mask=block_mask,
-    )
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_flex(counter, score_mod=None):
+    def attention(q, k, v, block_mask):
+        return flex_attention(q, k, v, score_mod=score_mod, block_mask=block_mask)
 
-    def call(q, k, v, _unused_block_mask):
-        return compiled(q, k, v)
-
-    return call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 class TestScoreMaskCombosEnvelope:
@@ -65,11 +55,11 @@ class TestScoreMaskCombosEnvelope:
         mask_mod = _COMBO_MASK_MODS[mask_mod_name]
 
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter, score_mod)
 
         for S in _RUNTIME_S:
             bm = create_block_mask(mask_mod, B=1, H=1, Q_LEN=S, KV_LEN=S,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm, score_mod)
             q = torch.randn(_B, _H, S, _D, device=npu_device, dtype=torch.float32,
                             requires_grad=True)
             k = torch.randn(_B, _H, S, _D, device=npu_device, dtype=torch.float32,

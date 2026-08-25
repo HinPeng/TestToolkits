@@ -1,9 +1,8 @@
 """Category Q: base score_mod/mask_mod scenarios with shape-specific BlockMasks.
 
 Each runtime ``(B, S)`` shape gets an exact, broadcastable ``B=1, H=1``
-BlockMask captured by ``functools.partial`` (together with ``score_mod``).
-All compiled partials share one backend and must reuse one graph across
-different B/S metadata capacities, matching community M01.
+BlockMask passed to one compiled function. The graph must be reused across
+different B/S metadata capacities.
 
 The reference is the dense SDPA math (``_dense_reference``) per shape,
 matching S: avoids comparing flex_attention against itself (eager on NPU
@@ -17,8 +16,6 @@ S >= 512 avoids the known flex_decode path issue at S <= 256
 Run:
     pytest test_flex_attention_q_base_scenario_envelope.py -v
 """
-import functools
-
 import pytest
 import torch
 import torch_npu  # noqa: F401
@@ -65,18 +62,11 @@ def _dense_ref_for(q, k, v, score_mod, mask_mod):
     )
 
 
-def _compile_flex_with_mask(counter, block_mask, score_mod=None):
-    attention = functools.partial(
-        flex_attention,
-        score_mod=score_mod,
-        block_mask=block_mask,
-    )
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_flex(counter, score_mod=None):
+    def attention(q, k, v, block_mask):
+        return flex_attention(q, k, v, score_mod=score_mod, block_mask=block_mask)
 
-    def call(q, k, v, _unused_block_mask):
-        return compiled(q, k, v)
-
-    return call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 class TestBaseScenarioEnvelope:
@@ -86,18 +76,18 @@ class TestBaseScenarioEnvelope:
     @pytest.mark.parametrize("mask_mod_name", list(_BASE_MASK_MODS.keys()))
     def test_base_mods_multi_shape_single_graph(self, npu_device, score_mod_name,
                                                 mask_mod_name):
-        """Exact BlockMask per (B, S) shape, captured via partial; all
-        compiled partials share one backend -> 1 compile.
+        """Exact BlockMask per (B, S) shape passed at runtime to one compiled
+        function -> 1 compile.
         """
         score_mod = _BASE_SCORE_MODS[score_mod_name]
         mask_mod = _BASE_MASK_MODS[mask_mod_name]
 
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter, score_mod)
 
         for B, S in _RUNTIME_SHAPES:
             bm = create_block_mask(mask_mod, B=1, H=1, Q_LEN=S, KV_LEN=S,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm, score_mod)
             q = torch.randn(B, _H, S, _D, device=npu_device, dtype=torch.float32)
             k = torch.randn(B, _H, S, _D, device=npu_device, dtype=torch.float32)
             v = torch.randn_like(k)

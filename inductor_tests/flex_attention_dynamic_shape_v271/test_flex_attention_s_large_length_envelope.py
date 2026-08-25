@@ -1,9 +1,8 @@
 """Category S: large Q/KV lengths (4K -> 8K -> 16K) with shape-specific BlockMasks.
 
 Each runtime ``S`` (or ``(Q, KV)``) shape gets an exact, broadcastable
-``B=1, H=1`` BlockMask captured by ``functools.partial``. All compiled
-partials share one backend and must reuse one graph across different S
-metadata capacities, matching community M01.
+``B=1, H=1`` BlockMask passed to one compiled function. The graph must be
+reused across different S metadata capacities.
 
 Reference is the dense SDPA math (``_dense_reference``) for parity with
 A/B/C/D: avoids comparing flex_attention against itself, which would be
@@ -13,8 +12,6 @@ memory. Forward only.
 Run:
     pytest test_flex_attention_s_large_length_envelope.py -v
 """
-import functools
-
 import torch
 import torch_npu  # noqa: F401
 import torch_npu._inductor  # noqa: F401
@@ -32,14 +29,11 @@ from test_flex_attention_dynamic_shape import (
 _B, _H, _D = 2, 2, 64   # static dims (B=2 to avoid Dynamo 0/1 specialization)
 
 
-def _compile_flex_with_mask(counter, block_mask):
-    attention = functools.partial(flex_attention, block_mask=block_mask)
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_flex(counter):
+    def attention(q, k, v, block_mask):
+        return flex_attention(q, k, v, block_mask=block_mask)
 
-    def call(q, k, v, _unused_block_mask):
-        return compiled(q, k, v)
-
-    return call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 def _check_large_shape(compiled, q, k, v, bm, tag):
@@ -57,11 +51,11 @@ class TestLargeLengthEnvelope:
         Dense reference per shape. Assert 1 compile.
         """
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for seq_len in [4096, 8192, 16384]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=seq_len, KV_LEN=seq_len,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, seq_len, _D, device=npu_device, dtype=torch.bfloat16)
             k = torch.randn(_B, _H, seq_len, _D, device=npu_device, dtype=torch.bfloat16)
             v = torch.randn_like(k)
@@ -79,11 +73,11 @@ class TestLargeLengthEnvelope:
         Dense reference per shape. Assert 1 compile.
         """
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for Q, KV in [(4096, 4096), (4096, 8192), (8192, 8192)]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=Q, KV_LEN=KV,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, Q, _D, device=npu_device, dtype=torch.bfloat16)
             k = torch.randn(_B, _H, KV, _D, device=npu_device, dtype=torch.bfloat16)
             v = torch.randn_like(k)

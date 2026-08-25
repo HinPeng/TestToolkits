@@ -1,9 +1,8 @@
 """Category P: return_lse=True with shape-specific BlockMasks.
 
 Each runtime ``S`` shape gets an exact, broadcastable ``B=1, H=1`` BlockMask
-captured by ``functools.partial`` (together with ``score_mod`` and
-``return_lse``). All compiled partials share one backend and must reuse one
-graph across different S metadata capacities, matching community M01.
+passed to one compiled function. The graph must be reused across different S
+metadata capacities.
 
 Both output and LSE are checked per shape. The eager reference is computed
 per shape with an EXACT-SIZED BlockMask.
@@ -11,8 +10,6 @@ per shape with an EXACT-SIZED BlockMask.
 Run:
     pytest test_flex_attention_p_return_lse_envelope.py -v
 """
-import functools
-
 import torch
 import torch_npu  # noqa: F401
 import torch_npu._inductor  # noqa: F401
@@ -27,19 +24,16 @@ from test_flex_attention_dynamic_shape import (
 )
 
 
-def _compile_flex_with_mask(counter, block_mask, score_mod=None, return_lse=False):
-    attention = functools.partial(
-        flex_attention,
-        score_mod=score_mod,
-        block_mask=block_mask,
-        return_lse=return_lse,
-    )
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_flex(counter, score_mod=None, return_lse=False):
+    def attention(q, k, v, block_mask):
+        return flex_attention(
+            q, k, v,
+            score_mod=score_mod,
+            block_mask=block_mask,
+            return_lse=return_lse,
+        )
 
-    def call(q, k, v, _unused_block_mask):
-        return compiled(q, k, v)
-
-    return call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 class TestReturnLseEnvelope:
@@ -53,13 +47,13 @@ class TestReturnLseEnvelope:
         dtype = torch.float32
 
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(
+            counter, score_mod=_base_identity_score_mod, return_lse=True
+        )
 
         for S in [256, 384, 512]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=S, KV_LEN=S,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm,
-                                                score_mod=_base_identity_score_mod,
-                                                return_lse=True)
             q = torch.randn(B, H, S, D, device=npu_device, dtype=dtype)
             k = torch.randn(B, H, S, D, device=npu_device, dtype=dtype)
             v = torch.randn(B, H, S, D, device=npu_device, dtype=dtype)
@@ -87,18 +81,21 @@ class TestReturnLseEnvelope:
         )
 
     def test_lse_causal(self, npu_device):
-        """P2: causal mask + return_lse, exact masks over S = 128/256;
-        out + LSE checked per shape. 1 compile.
+        """P2: causal mask + return_lse, exact masks over S = 256/384/512.
+
+        BlockMask capacity starts at 2 so this test does not cross Dynamo's
+        community-defined size-0/1 specialization domain. Out + LSE are
+        checked per shape. 1 compile.
         """
         B, H, D = 2, 4, 64
         dtype = torch.float32
 
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter, return_lse=True)
 
-        for S in [128, 256]:
+        for S in [256, 384, 512]:
             bm = create_block_mask(_base_causal_mask_mod, B=1, H=1, Q_LEN=S, KV_LEN=S,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm, return_lse=True)
             q = torch.randn(B, H, S, D, device=npu_device, dtype=dtype)
             k = torch.randn(B, H, S, D, device=npu_device, dtype=dtype)
             v = torch.randn(B, H, S, D, device=npu_device, dtype=dtype)

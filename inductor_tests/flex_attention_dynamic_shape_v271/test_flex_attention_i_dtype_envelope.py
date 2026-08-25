@@ -1,9 +1,8 @@
 """Category I: dtype x dynamic shape with shape-specific BlockMasks.
 
 Each runtime ``(Q, KV)`` shape gets an exact, broadcastable ``B=1, H=1``
-BlockMask captured by ``functools.partial``. All compiled partials share one
-backend and must reuse one graph across different Q/KV metadata capacities,
-matching community M01.
+BlockMask passed to one compiled function. The graph must be reused across
+different Q/KV metadata capacities.
 
 dtype stays parameterized: each dtype is its own graph (dtype is a static
 specialization dimension, not a runtime dynamic dim). Per-dtype tolerances
@@ -13,8 +12,6 @@ are kept via a local ``_check_dtype_shape`` helper because the shared
 Run:
     pytest test_flex_attention_i_dtype_envelope.py -v
 """
-import functools
-
 import pytest
 import torch
 import torch_npu  # noqa: F401
@@ -35,14 +32,11 @@ _B, _H, _D = 1, 2, 64                 # static dims; B=1 because dtype is the
 _RUNTIME_SHAPES = [(256, 256), (256, 512), (512, 512)]
 
 
-def _compile_flex_with_mask(counter, block_mask):
-    attention = functools.partial(flex_attention, block_mask=block_mask)
-    compiled = torch.compile(attention, backend=counter, dynamic=True)
+def _compile_flex(counter):
+    def attention(q, k, v, block_mask):
+        return flex_attention(q, k, v, block_mask=block_mask)
 
-    def call(q, k, v, _unused_block_mask):
-        return compiled(q, k, v)
-
-    return call
+    return torch.compile(attention, backend=counter, dynamic=True)
 
 
 def _check_dtype_shape(compiled, q, k, v, bm, *, atol, rtol, tag):
@@ -74,16 +68,16 @@ class TestDtypeEnvelope:
         (torch.float16, 5e-3, 5e-3),
     ])
     def test_i1_dtype_dynamic_shapes(self, npu_device, dtype, atol, rtol):
-        """Exact BlockMask per (Q, KV) shape, captured via partial; all
-        compiled partials share one backend -> 1 compile per dtype.
+        """Exact BlockMask per (Q, KV) shape passed at runtime to one compiled
+        function -> 1 compile per dtype.
         fwd+bwd numerically checked at per-dtype tolerance on every shape.
         """
         counter = CompileCounterWithBackend("inductor")
+        compiled = _compile_flex(counter)
 
         for Q, KV in _RUNTIME_SHAPES:
             bm = create_block_mask(_causal_mask, B=1, H=1, Q_LEN=Q, KV_LEN=KV,
                                    device=npu_device)
-            compiled = _compile_flex_with_mask(counter, bm)
             q = torch.randn(_B, _H, Q, _D, device=npu_device, dtype=dtype,
                             requires_grad=True)
             k = torch.randn(_B, _H, KV, _D, device=npu_device, dtype=dtype,
