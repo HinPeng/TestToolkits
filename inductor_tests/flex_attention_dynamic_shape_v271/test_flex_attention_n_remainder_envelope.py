@@ -1,20 +1,17 @@
-"""Category N: remainder (%) operator guards with shape-specific BlockMasks.
+"""Category N: remainder (%) operators with shape-specific BlockMasks.
 
-The passing operator tests (N2/N3/N5/N6) use the same fix pattern as A-D:
-each runtime ``S`` shape gets an exact, broadcastable ``B=1, H=1`` BlockMask
-passed to one compiled function, which must reuse one graph across different
-S metadata capacities.
+The dynamic operator tests use one compiled function across runtime ``S``
+shapes. Runtime and eager-reference BlockMasks use the same real ``B``/``H``
+dimensions so head-dependent masks have identical semantics.
 
 The eager reference is computed per shape with an EXACT-SIZED BlockMask.
 
-The three xfail guard tests (N1/N4/N4b: aten.remainder.Scalar unsupported in
-mask_mod lowering on NPU) keep their original single-shape structure: they
-are expected to fail on the very first compiled call.
+N1/N4/N4b keep their original single-shape structure and verify supported
+remainder forms directly.
 
 Run:
     pytest test_flex_attention_n_remainder_envelope.py -v
 """
-import pytest
 import torch
 import torch_npu  # noqa: F401
 import torch_npu._inductor  # noqa: F401
@@ -27,7 +24,7 @@ from test_flex_attention_dynamic_shape import (
     _base_causal_mask_mod,
     _remainder_mask_mod,
     _remainder_mod3_mask,
-    _remainder_no_compare_mask,
+    _remainder_boolean_mask,
     _remainder_in_score_mod,
     _bitwise_and_mask,
     _equiv_form_mask,
@@ -52,7 +49,7 @@ def _run_mask_envelope(npu_device, mask_mod, *, score_mod=None, with_backward=Fa
     compiled = _compile_flex(counter, score_mod)
 
     for S in _RUNTIME_S:
-        bm = create_block_mask(mask_mod, B=1, H=1, Q_LEN=S, KV_LEN=S,
+        bm = create_block_mask(mask_mod, B=_B, H=_H, Q_LEN=S, KV_LEN=S,
                                device=npu_device)
         q = torch.randn(_B, _H, S, _D, device=npu_device, dtype=torch.float32,
                         requires_grad=True)
@@ -92,12 +89,8 @@ def _run_mask_envelope(npu_device, mask_mod, *, score_mod=None, with_backward=Fa
 class TestRemainderEnvelope:
     """N: remainder (%) operator guards with exact dynamic-shape masks."""
 
-    @pytest.mark.xfail(
-        reason="NPU bug: aten.remainder.Scalar not supported in mask_mod subgraph lowering",
-        strict=True,
-    )
-    def test_remainder_in_mask_mod_fails(self, npu_device):
-        """N1: mask_mod with % should fail on NPU Inductor (single shape)."""
+    def test_remainder_in_mask_mod_passes(self, npu_device):
+        """N1: mask_mod with % works on NPU Inductor (single shape)."""
         B, H, S, D = 2, 8, 256, 64
         q = torch.randn(B, H, S, D, device=npu_device, dtype=torch.float32, requires_grad=True)
         k = torch.randn(B, H, S, D, device=npu_device, dtype=torch.float32, requires_grad=True)
@@ -121,12 +114,8 @@ class TestRemainderEnvelope:
         """N3: & 1 works in mask_mod, exact masks."""
         _run_mask_envelope(npu_device, _bitwise_and_mask)
 
-    @pytest.mark.xfail(
-        reason="NPU bug: aten.remainder.Scalar with any divisor fails in mask_mod",
-        strict=True,
-    )
     def test_remainder_diff_divisor(self, npu_device):
-        """N4: % 3 also fails (single shape)."""
+        """N4: % 3 works in mask_mod (single shape)."""
         B, H, S, D = 2, 8, 256, 64
         q = torch.randn(B, H, S, D, device=npu_device, dtype=torch.float32, requires_grad=True)
         k = torch.randn(B, H, S, D, device=npu_device, dtype=torch.float32, requires_grad=True)
@@ -141,17 +130,13 @@ class TestRemainderEnvelope:
         comp_out = compiled_fn(q, k, v)
         torch.testing.assert_close(comp_out, ref_out, atol=1e-2, rtol=1e-2)
 
-    @pytest.mark.xfail(
-        reason="NPU bug: aten.remainder.Scalar in any form fails in mask_mod",
-        strict=True,
-    )
-    def test_remainder_with_comparison_only(self, npu_device):
-        """N4b: % without == (h % 2 as boolean) still fails (single shape)."""
+    def test_remainder_boolean_comparison(self, npu_device):
+        """N4b: % with an explicit boolean comparison works (single shape)."""
         B, H, S, D = 2, 8, 256, 64
         q = torch.randn(B, H, S, D, device=npu_device, dtype=torch.float32, requires_grad=True)
         k = torch.randn(B, H, S, D, device=npu_device, dtype=torch.float32, requires_grad=True)
         v = torch.randn(B, H, S, D, device=npu_device, dtype=torch.float32, requires_grad=True)
-        bm = create_block_mask(_remainder_no_compare_mask, B=B, H=H, Q_LEN=S, KV_LEN=S, device=npu_device)
+        bm = create_block_mask(_remainder_boolean_mask, B=B, H=H, Q_LEN=S, KV_LEN=S, device=npu_device)
 
         def op_fn(q_, k_, v_):
             return flex_attention(q_, k_, v_, block_mask=bm)

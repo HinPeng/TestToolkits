@@ -171,9 +171,9 @@ def _remainder_mod3_mask(b, h, m, n):
     return (h % 3 == 0) | (m >= n)
 
 
-def _remainder_no_compare_mask(b, h, m, n):
-    """Uses h % 2 directly as boolean."""
-    return (h % 2) | (m >= n)
+def _remainder_boolean_mask(b, h, m, n):
+    """Uses % with an explicit boolean comparison."""
+    return (h % 2 != 0) | (m >= n)
 
 
 def _remainder_in_score_mod(score, b, h, m, n):
