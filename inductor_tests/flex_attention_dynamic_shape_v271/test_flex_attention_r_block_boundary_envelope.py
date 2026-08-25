@@ -85,14 +85,17 @@ class TestBlockBoundaryEnvelope:
             f"got {counter.frame_count}"
         )
 
-    def test_r3_kv_from_below_to_above_128(self, npu_device):
-        """R3: KV = 64 -> 127 -> 128 -> 129 (kv capacity 1 -> 2). Exact masks
-        per shape -> 1 compile.
+    def test_r3_kv_capacity_ge2_dynamic(self, npu_device):
+        """R3: KV = 129 -> 256 -> 257 -> 384 (capacities 2 -> 3).
+
+        Capacity 1 is excluded because Dynamo specializes tensor dimensions
+        of size 0/1 as a separate compile domain. Exact masks per shape -> 1
+        compile.
         """
         counter = CompileCounterWithBackend("inductor")
         compiled = _compile_flex(counter)
 
-        for kv_len in [64, 127, 128, 129]:
+        for kv_len in [129, 256, 257, 384]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=256, KV_LEN=kv_len,
                                    device=npu_device)
             q = torch.randn(_B, _H, 256, _D, device=npu_device, dtype=torch.bfloat16,
@@ -113,7 +116,7 @@ class TestBlockBoundaryEnvelope:
         counter = CompileCounterWithBackend("inductor")
         compiled = _compile_flex(counter)
 
-        for Q, KV in [(32, 128), (64, 512)]:
+        for Q, KV in [(32, 256), (64, 512)]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=Q, KV_LEN=KV,
                                    device=npu_device)
             q = torch.randn(_B, _H, Q, _D, device=npu_device, dtype=torch.bfloat16,
@@ -136,7 +139,7 @@ class TestBlockBoundaryEnvelope:
         counter = CompileCounterWithBackend("inductor")
         compiled = _compile_flex(counter)
 
-        for Q, KV in [(128, 32), (512, 64)]:
+        for Q, KV in [(256, 32), (512, 64)]:
             bm = create_block_mask(noop_mask, B=1, H=1, Q_LEN=Q, KV_LEN=KV,
                                    device=npu_device)
             q = torch.randn(_B, _H, Q, _D, device=npu_device, dtype=torch.bfloat16,

@@ -24,7 +24,8 @@ from test_flex_attention_dynamic_shape import (
 )
 
 _B, _H = 2, 8
-_RUNTIME_S = [128, 192, 256]
+# Start at capacity 2; Dynamo specializes metadata dimensions of size 0/1.
+_RUNTIME_S = [256, 384, 512]
 
 
 def _compile_flex(counter):
@@ -39,7 +40,7 @@ class TestHeadDimEnvelope:
 
     @pytest.mark.parametrize("head_dim", [16, 24, 32, 64, 80, 94, 96, 128])
     def test_head_dim(self, npu_device, head_dim):
-        """Exact masks per head_dim over S = 128/192/256, fwd only."""
+        """Exact masks per head_dim over S = 256/384/512, fwd only."""
         dtype = torch.float32
 
         counter = CompileCounterWithBackend("inductor")
