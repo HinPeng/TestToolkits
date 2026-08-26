@@ -74,10 +74,12 @@ def test_b_q_len_dynamic(npu_device, dtype, score_mod_name):
         k = torch.randn(B_FIXED, H, KV, D, device=npu_device, dtype=dtype)
         v = torch.randn(B_FIXED, H, KV, D, device=npu_device, dtype=dtype)
         actual = compiled(q, k, v, bm)
+        torch.npu.synchronize()
         expected = dense_reference(
             q, k, v, score_mod_name=score_mod_name,
             head_offset_buffer=head_offset_buffer,
         )
+        torch.npu.synchronize()
         assert_close(actual, expected, f"B {score_mod_name} Q={Q} KV={KV} {dtype}")
 
     assert_frame_count(counter, f"B {score_mod_name}")

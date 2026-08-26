@@ -339,30 +339,29 @@ def compile_flex(counter, *, score_mod, enable_gqa=False):
 # Assert helpers
 # ============================================================================
 def assert_close(actual, expected, tag, *, atol=SD_ATOL, rtol=SD_RTOL):
-    # Mirror base/test_flex_attention.py: move tensors to CPU before comparing
-    # so NPU-side subtle numerical differences don't leak into assert_close.
-    # atol/rtol default to SD_ATOL/SD_RTOL (5e-3); callers may pass looser
-    # tolerances for bf16 in degenerate reductions (e.g. C: KV=256).
-    a = actual.detach().cpu()
-    e = expected.detach().cpu()
-    abs_diff = (a - e).abs()
-    # Per-element tolerance: atol + rtol * |expected|
-    tol = atol + rtol * e.abs()
-    mismatched = (abs_diff > tol)
-    mismatch_count = int(mismatched.sum().item())
-    total = mismatched.numel()
-    if mismatch_count > 0:
-        max_abs_err = abs_diff.max().item()
-        idx = int(mismatched.reshape(-1).argmax().item())
-        max_rel_err = (abs_diff / (e.abs() + 1e-12)).max().item()
-        raise AssertionError(
-            f"{tag}: forward output mismatch | "
-            f"mismatched {mismatch_count}/{total} ({100.0*mismatch_count/total:.2f}%) | "
-            f"max_abs_err={max_abs_err:.6e} at flat_idx={idx} | "
-            f"max_rel_err={max_rel_err:.6e} | "
-            f"tol={atol:.e}+{rtol:.e}*|exp| (sample exp={e.reshape(-1)[idx].item():.6e}, "
-            f"act={a.reshape(-1)[idx].item():.6e})"
+    """Compare tensors while preserving PyTorch's mismatch diagnostics.
+
+    Passing ``msg`` directly to ``torch.testing.assert_close`` replaces its
+    default diagnostic in some supported PyTorch versions.  Catch the failure
+    instead so the test tag is prepended to details such as mismatched element
+    count and greatest absolute/relative differences.
+    """
+    try:
+        torch.testing.assert_close(
+            actual.cpu(), expected.cpu(), atol=atol, rtol=rtol,
         )
+    except AssertionError as exc:
+        raise AssertionError(f"{tag}: forward output mismatch\n{exc}") from exc
+
+
+def assert_close_with_details(actual, expected, tag, *, atol=SD_ATOL, rtol=SD_RTOL):
+    """Generic version used for gradients and other non-forward comparisons."""
+    try:
+        torch.testing.assert_close(
+            actual.cpu(), expected.cpu(), atol=atol, rtol=rtol,
+        )
+    except AssertionError as exc:
+        raise AssertionError(f"{tag}\n{exc}") from exc
 
 
 def assert_frame_count(counter, tag):

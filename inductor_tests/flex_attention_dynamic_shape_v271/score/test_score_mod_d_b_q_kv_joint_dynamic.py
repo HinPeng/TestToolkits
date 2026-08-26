@@ -27,13 +27,12 @@ from test_score_mod_dynamic_common import (
     npu_device,            # noqa: F401
     DEFAULT_H_Q,
     DEFAULT_D,
-    SD_ATOL,
-    SD_RTOL,
     ALL_SCORE_MOD_NAMES,
     resolve_score_mod,
     dense_reference,
     compile_flex_with,
     assert_close,
+    assert_close_with_details,
     assert_frame_count,
     assert_grad_finite,
     _get_head_offset,
@@ -50,31 +49,6 @@ BQKV_SHAPES = [
     (2, 512, 1024),   # Q != KV cross-attn shape
     (4, 1024, 512),
 ]
-
-
-def _assert_grad_close(actual, expected, *, tag, atol=SD_ATOL, rtol=SD_RTOL):
-    """Like assert_close but for backward grads; prints mismatched count +
-    max abs/rel err to distinguish small-range precision drift from large-range
-    bugs. Moves to CPU first to avoid NPU-side subtle numerical differences."""
-    a = actual.detach().cpu()
-    e = expected.detach().cpu()
-    abs_diff = (a - e).abs()
-    tol = atol + rtol * e.abs()
-    mismatched = (abs_diff > tol)
-    mismatch_count = int(mismatched.sum().item())
-    total = mismatched.numel()
-    if mismatch_count > 0:
-        max_abs_err = abs_diff.max().item()
-        idx = int(mismatched.reshape(-1).argmax().item())
-        max_rel_err = (abs_diff / (e.abs() + 1e-12)).max().item()
-        raise AssertionError(
-            f"{tag}: grad mismatch | "
-            f"mismatched {mismatch_count}/{total} ({100.0*mismatch_count/total:.2f}%) | "
-            f"max_abs_err={max_abs_err:.6e} at flat_idx={idx} | "
-            f"max_rel_err={max_rel_err:.6e} | "
-            f"tol={atol:.e}+{rtol:.e}*|exp| (sample exp={e.reshape(-1)[idx].item():.6e}, "
-            f"act={a.reshape(-1)[idx].item():.6e})"
-        )
 
 
 @pytest.mark.parametrize("score_mod_name", ALL_SCORE_MOD_NAMES)
@@ -108,16 +82,19 @@ def test_d_b_q_kv_joint_dynamic(npu_device, dtype, score_mod_name):
 
         # Forward
         actual = compiled(q, k, v)
+        torch.npu.synchronize()
         expected = dense_reference(
             q, k, v, score_mod_name=score_mod_name,
             head_offset_buffer=head_offset_buffer,
         )
+        torch.npu.synchronize()
         assert_close(actual, expected, f"D {score_mod_name} B={B} Q={Q} KV={KV} fwd {dtype}")
 
         # Backward: compare compiled grads to dense reference grads
         # Use same grad_out for both compiled and reference
         grad_out = torch.randn_like(actual)
         actual.backward(grad_out)
+        torch.npu.synchronize()
         compiled_q_grad = q.grad.clone()
         compiled_k_grad = k.grad.clone()
         compiled_v_grad = v.grad.clone()
@@ -140,20 +117,18 @@ def test_d_b_q_kv_joint_dynamic(npu_device, dtype, score_mod_name):
             q_ref, k_ref, v_ref, score_mod_name=score_mod_name,
             head_offset_buffer=head_offset_buffer,
         )
+        torch.npu.synchronize()
         expected_ref.backward(grad_out)
-        # Mirror base/test_flex_attention.py: compare grads on CPU to avoid
-        # NPU-side subtle numerical differences leaking into assert_close.
-        # Custom assert prints mismatched count + max abs/rel err so we can
-        # tell small-range precision drift from large-range bugs.
-        _assert_grad_close(
+        torch.npu.synchronize()
+        assert_close_with_details(
             compiled_q_grad, q_ref.grad,
             tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} q_grad {dtype}",
         )
-        _assert_grad_close(
+        assert_close_with_details(
             compiled_k_grad, k_ref.grad,
             tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} k_grad {dtype}",
         )
-        _assert_grad_close(
+        assert_close_with_details(
             compiled_v_grad, v_ref.grad,
             tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} v_grad {dtype}",
         )

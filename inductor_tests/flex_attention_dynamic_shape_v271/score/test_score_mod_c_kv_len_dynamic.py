@@ -83,10 +83,12 @@ def test_c_kv_len_dynamic(npu_device, dtype, score_mod_name):
         k = torch.randn(B_FIXED, H, KV, D, device=npu_device, dtype=dtype)
         v = torch.randn(B_FIXED, H, KV, D, device=npu_device, dtype=dtype)
         actual = compiled(q, k, v)
+        torch.npu.synchronize()
         expected = dense_reference(
             q, k, v, score_mod_name=score_mod_name,
             head_offset_buffer=head_offset_buffer,
         )
+        torch.npu.synchronize()
         if atol is not None:
             assert_close(
                 actual, expected, f"C {score_mod_name} KV={KV} {dtype}",

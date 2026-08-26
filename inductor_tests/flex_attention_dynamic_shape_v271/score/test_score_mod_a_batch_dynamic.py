@@ -117,12 +117,14 @@ def test_a_batch_dynamic(npu_device, dtype, score_mod_name):
         )
         q, k, v = _make_qkv(B, H, Q_KV_FIXED, Q_KV_FIXED, D, npu_device, dtype)
         actual = compiled(q, k, v, bm)
+        torch.npu.synchronize()
         if skip_precision:
             continue
         expected = dense_reference(
             q, k, v, score_mod_name=score_mod_name,
             head_offset_buffer=head_offset_buffer,
         )
+        torch.npu.synchronize()
         if atol is not None:
             assert_close(
                 actual, expected, f"A {score_mod_name} B={B} {dtype}",
