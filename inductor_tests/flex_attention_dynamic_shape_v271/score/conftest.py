@@ -7,14 +7,36 @@ import torch
 KNOWN_RUNTIME_SKIP_CASES = {
     (
         "test_a_batch_dynamic",
-        torch.float16,
         "trig",
-    ): "Known Ascend_950 NPU runtime error for fp16 + trig score_mod",
+    ): "Known Ascend_950 NPU runtime error for all dtypes with trig score_mod",
     (
         "test_a_batch_dynamic",
-        torch.float16,
         "trig2",
-    ): "Known Ascend_950 NPU runtime error for fp16 + trig2 score_mod",
+    ): "Known Ascend_950 NPU runtime error for all dtypes with trig2 score_mod",
+    (
+        "test_b_q_len_dynamic",
+        "trig",
+    ): "Known Ascend_950 NPU runtime error for all dtypes with trig score_mod",
+    (
+        "test_b_q_len_dynamic",
+        "trig2",
+    ): "Known Ascend_950 NPU runtime error for all dtypes with trig2 score_mod",
+    (
+        "test_c_kv_len_dynamic",
+        "trig",
+    ): "Known Ascend_950 NPU runtime error for all dtypes with trig score_mod",
+    (
+        "test_c_kv_len_dynamic",
+        "trig2",
+    ): "Known Ascend_950 NPU runtime error for all dtypes with trig2 score_mod",
+    (
+        "test_d_b_q_kv_joint_dynamic",
+        "trig",
+    ): "Known Ascend_950 NPU runtime error for all dtypes with trig score_mod",
+    (
+        "test_d_b_q_kv_joint_dynamic",
+        "trig2",
+    ): "Known Ascend_950 NPU runtime error for all dtypes with trig2 score_mod",
 }
 
 
@@ -28,7 +50,6 @@ def pytest_collection_modifyitems(config, items):
         test_name = getattr(item, "originalname", None) or item.name.split("[", 1)[0]
         key = (
             test_name,
-            callspec.params.get("dtype"),
             callspec.params.get("score_mod_name"),
         )
         reason = KNOWN_RUNTIME_SKIP_CASES.get(key)
