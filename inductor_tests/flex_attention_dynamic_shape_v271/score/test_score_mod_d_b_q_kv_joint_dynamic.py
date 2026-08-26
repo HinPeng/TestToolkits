@@ -83,10 +83,11 @@ def test_d_b_q_kv_joint_dynamic(npu_device, dtype, score_mod_name):
         # Forward
         actual = compiled(q, k, v)
         torch.npu.synchronize()
-        expected = dense_reference(
-            q, k, v, score_mod_name=score_mod_name,
-            head_offset_buffer=head_offset_buffer,
-        )
+        with torch.no_grad():
+            expected = dense_reference(
+                q, k, v, score_mod_name=score_mod_name,
+                head_offset_buffer=head_offset_buffer,
+            )
         torch.npu.synchronize()
         assert_close(actual, expected, f"D {score_mod_name} B={B} Q={Q} KV={KV} fwd {dtype}")
 
@@ -109,27 +110,30 @@ def test_d_b_q_kv_joint_dynamic(npu_device, dtype, score_mod_name):
         k.grad = None
         v.grad = None
 
-        # Dense reference backward (autograd on dense_reference)
-        q_ref = q.detach().clone().requires_grad_(True)
-        k_ref = k.detach().clone().requires_grad_(True)
-        v_ref = v.detach().clone().requires_grad_(True)
+        # Dense reference backward: make fp32 leaves so both the eager forward
+        # and its gradient reductions stay in fp32. The reference output and
+        # resulting grads are cast back to the kernel dtype only for comparison.
+        q_ref = q.detach().to(torch.float32).requires_grad_(True)
+        k_ref = k.detach().to(torch.float32).requires_grad_(True)
+        v_ref = v.detach().to(torch.float32).requires_grad_(True)
         expected_ref = dense_reference(
             q_ref, k_ref, v_ref, score_mod_name=score_mod_name,
             head_offset_buffer=head_offset_buffer,
+            output_dtype=dtype,
         )
         torch.npu.synchronize()
         expected_ref.backward(grad_out)
         torch.npu.synchronize()
         assert_close_with_details(
-            compiled_q_grad, q_ref.grad,
+            compiled_q_grad, q_ref.grad.to(dtype),
             tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} q_grad {dtype}",
         )
         assert_close_with_details(
-            compiled_k_grad, k_ref.grad,
+            compiled_k_grad, k_ref.grad.to(dtype),
             tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} k_grad {dtype}",
         )
         assert_close_with_details(
-            compiled_v_grad, v_ref.grad,
+            compiled_v_grad, v_ref.grad.to(dtype),
             tag=f"D {score_mod_name} B={B} Q={Q} KV={KV} v_grad {dtype}",
         )
 

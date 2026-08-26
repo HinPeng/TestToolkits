@@ -8,7 +8,9 @@ Mirrors dynamic-fix/test_flex_attention_dynamic_shape.py structure but:
   - atol=5e-3, rtol=5e-3 (SD series standard).
   - autouse _reset_dynamo_cache to isolate CompileCounterWithBackend across tests.
 
-Reference: dense fp32 SDPA with score_fn(scores, q_idx, kv_idx) applied.
+Reference: dense fp32 SDPA with score_fn(scores, q_idx, kv_idx) applied.  All
+reference operands are promoted to fp32 before any attention math, and only
+the final result is cast back to the dtype used by the compiled kernel.
 """
 import math
 
@@ -39,6 +41,7 @@ except Exception:
 # ============================================================================
 SD_ATOL = 5e-3
 SD_RTOL = 5e-3
+REFERENCE_DTYPE = torch.float32
 
 
 # ============================================================================
@@ -230,30 +233,49 @@ DENSE_SCORE_FN_REGISTRY = {
 }
 
 
-def dense_reference(q, k, v, *, score_mod_name, head_offset_buffer=None):
-    """Dense SDPA reference that mirrors the score_mod semantics.
+def dense_reference(
+    q,
+    k,
+    v,
+    *,
+    score_mod_name,
+    head_offset_buffer=None,
+    output_dtype=None,
+):
+    """Run the eager SDPA reference in fp32, then cast its output for comparison.
 
     For score_mods that depend on b or h (alibi_bias uses h, trig/trig2 use b,
     head_offset uses h with captured buffer), loop over the corresponding axis
     so the reference matches compiled flex_attention exactly.
 
     Args:
-        q, k, v: [B, H, Q, D] / [B, H, KV, D] / [B, H, KV, D] (fp32 promoted)
+        q, k, v: [B, H, Q, D] / [B, H, KV, D] / [B, H, KV, D].
+            They may be fp16/bf16; all three are promoted before any matmul.
         score_mod_name: name from ALL_SCORE_MOD_NAMES
         head_offset_buffer: required for "head_offset"; shape [H]
+        output_dtype: dtype of the returned reference. Defaults to q.dtype so
+            fp16/bf16 tests compare tensors after the same final dtype cast.
     """
+    comparison_dtype = q.dtype if output_dtype is None else output_dtype
     B, H, Q, D = q.shape
     _, _, KV, _ = k.shape
-    q_idx = torch.arange(Q, device=q.device, dtype=torch.float32)[:, None]  # [Q,1]
-    kv_idx = torch.arange(KV, device=k.device, dtype=torch.float32)[None, :]  # [1,KV]
+    q_idx = torch.arange(Q, device=q.device, dtype=REFERENCE_DTYPE)[:, None]  # [Q,1]
+    kv_idx = torch.arange(KV, device=k.device, dtype=REFERENCE_DTYPE)[None, :]  # [1,KV]
 
-    # Compute scores per (b, h) for score_mods that need them; otherwise vectorize.
-    q_f = q.float()
-    k_f = k.float()
-    v_f = v.float()
+    # Promote every eager operand before attention math. In particular, keeping
+    # v in fp16/bf16 would make the attention/value reduction accumulate in the
+    # low-precision dtype even if scores and softmax were already fp32.
+    q_f = q.to(dtype=REFERENCE_DTYPE)
+    k_f = k.to(dtype=REFERENCE_DTYPE)
+    v_f = v.to(dtype=REFERENCE_DTYPE)
+    head_offset_f = (
+        None
+        if head_offset_buffer is None
+        else head_offset_buffer.to(device=q.device, dtype=REFERENCE_DTYPE)
+    )
     scale = 1.0 / math.sqrt(D)
 
-    out = torch.empty(B, H, Q, D, dtype=torch.float32, device=q.device)
+    out = torch.empty(B, H, Q, D, dtype=REFERENCE_DTYPE, device=q.device)
 
     for b in range(B):
         for h in range(H):
@@ -280,14 +302,27 @@ def dense_reference(q, k, v, *, score_mod_name, head_offset_buffer=None):
                 scale_h = math.exp2(-((h + 1) * 8.0 / num_heads))
                 scores = scores + (kv_idx - q_idx) * scale_h
             elif score_mod_name == "trig":
-                scores = torch.sin(torch.cos(scores)) + torch.tan(torch.tensor(float(b)))
+                batch_index = torch.tensor(
+                    float(b), device=q.device, dtype=REFERENCE_DTYPE,
+                )
+                scores = torch.sin(torch.cos(scores)) + torch.tan(batch_index)
             elif score_mod_name == "trig2":
-                scores = torch.cos(scores) * torch.sin(scores) + torch.tan(torch.tensor(float(b)))
+                batch_index = torch.tensor(
+                    float(b), device=q.device, dtype=REFERENCE_DTYPE,
+                )
+                scores = (
+                    torch.cos(scores) * torch.sin(scores)
+                    + torch.tan(batch_index)
+                )
             elif score_mod_name == "head_offset":
-                scores = scores * head_offset_buffer[h]
+                if head_offset_f is None:
+                    raise ValueError(
+                        "head_offset_buffer is required for head_offset"
+                    )
+                scores = scores * head_offset_f[h]
             else:
                 raise ValueError(f"Unknown score_mod: {score_mod_name}")
-            attn = torch.softmax(scores, dim=-1)
+            attn = torch.softmax(scores, dim=-1, dtype=REFERENCE_DTYPE)
             # PyTorch SDPA / flex_attention use safe-softmax semantics: rows
             # where every score is -inf (e.g. inverse_causal when Q > KV) yield
             # 0 instead of NaN. Plain torch.softmax produces NaN on such rows;
@@ -295,7 +330,7 @@ def dense_reference(q, k, v, *, score_mod_name, head_offset_buffer=None):
             # behavior in degenerate shapes (C: Q=512 > KV=256 + inverse_causal).
             attn = torch.nan_to_num(attn, nan=0.0)
             out[b, h] = torch.matmul(attn, v_f[b, h])
-    return out.to(q.dtype)
+    return out.to(dtype=comparison_dtype)
 
 
 # ============================================================================
