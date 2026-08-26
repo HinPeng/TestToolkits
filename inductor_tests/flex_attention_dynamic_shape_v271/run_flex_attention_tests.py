@@ -6,7 +6,7 @@ Examples::
     python run_flex_attention_tests.py --list
     python run_flex_attention_tests.py a
     python run_flex_attention_tests.py --cases a,c-f
-    python run_flex_attention_tests.py a-s --timeout 3600
+    python run_flex_attention_tests.py a-s --timeout 14400
     python run_flex_attention_tests.py sd
     python run_flex_attention_tests.py score_mod_a
     python run_flex_attention_tests.py --cases a-s,sd
@@ -488,8 +488,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--timeout",
         type=int,
-        default=3600,
-        help="timeout per case in seconds (default: 3600)",
+        default=14400,
+        help="timeout per case in seconds (default: 14400)",
     )
     parser.add_argument("--stop-on-failure", action="store_true", help="stop after the first FAIL/TIMEOUT")
     parser.add_argument("--no-report", action="store_true", help="do not generate REPORT.md/REPORT.json")

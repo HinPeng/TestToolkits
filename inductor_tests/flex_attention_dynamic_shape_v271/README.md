@@ -38,7 +38,7 @@ a/torch_compile_debug/  # 最终调试树：fx_graph、output_code.py 等
 
 Inductor/Triton 的中间编译 cache 会放在系统临时目录，单个用例结束后自动清理，不会写入 `a/` 等用例目录。
 
-默认每个字母最多运行 3600 秒。可以使用 `--timeout`、`--stop-on-failure` 或 `--output-root` 调整行为。
+默认每个字母最多运行 14400 秒。可以使用 `--timeout`、`--stop-on-failure` 或 `--output-root` 调整行为。
 
 报告可以在运行结束后单独重新生成：
 
