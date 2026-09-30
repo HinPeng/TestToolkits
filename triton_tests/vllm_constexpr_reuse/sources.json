@@ -1,0 +1,116 @@
+{
+  "repository": "https://github.com/vllm-project/vllm-ascend",
+  "revision": "18d0537d919c303952fbe6f3442349d0de42970d",
+  "functions": {
+    "muls_add_kernel": {
+      "path": "vllm_ascend/ops/triton/mul_add.py",
+      "line": 7,
+      "sha256": "e3f5e305590bac089f35489482ccc0b052fe47fbe206429d8e4e70f37e5809a8"
+    },
+    "_compute_slot_mapping_request": {
+      "path": "vllm_ascend/ops/triton/compute_slot_mapping.py",
+      "line": 93,
+      "sha256": "a5e84277f3aa40f668f1764221e1ea9547ae0689b9ab7f74f8ba2c4b46c24505"
+    },
+    "_compute_slot_mapping_fused_groups_kernel": {
+      "path": "vllm_ascend/ops/triton/compute_slot_mapping.py",
+      "line": 155,
+      "sha256": "a19d15a95bafd28b7656f8350760134b5737b450c6a73cc918045e8ba0d8c480"
+    },
+    "_compute_slot_mapping_fused_groups_adaptive_kernel": {
+      "path": "vllm_ascend/ops/triton/compute_slot_mapping.py",
+      "line": 229,
+      "sha256": "e7c4adb4486a4aa63e5c2ea3e21570f97b876064b7f9090db364bf562fe99a4a"
+    },
+    "triton_rms_kernel": {
+      "path": "vllm_ascend/ops/triton/rms_norm.py",
+      "line": 5,
+      "sha256": "29aa165804006f02676322c9f50a8313349ead89e7f07f617984b8f5162ef06b"
+    },
+    "build_local_metadata_triton": {
+      "path": "vllm_ascend/ops/triton/dsa_cp.py",
+      "line": 4,
+      "sha256": "28f8557cf64d2038db357025ac7853def8098ff2654ea588cf3598020954b720"
+    },
+    "token_bin_counts_and_mask_kernel": {
+      "path": "vllm_ascend/ops/triton/bincount.py",
+      "line": 31,
+      "sha256": "488348ea8566392b66b0b07373099228ce464095265e4054883c363e9061e6e6"
+    },
+    "rejection_random_sample_kernel": {
+      "path": "vllm_ascend/ops/triton/reject_sample.py",
+      "line": 171,
+      "sha256": "bc40d1c3a122b9e700650bb6d20bc0e1f16f9c633c9cb6ba1a239d91790c6367"
+    },
+    "expand_kernel": {
+      "path": "vllm_ascend/ops/triton/reject_sample.py",
+      "line": 364,
+      "sha256": "94a64d2b10777bffd833e1ca31a5db0b88e76e4717e78135acf89e1cb2134364"
+    },
+    "ngram_spec_decode_kernel": {
+      "path": "vllm_ascend/ops/triton/spec_decode/ngram.py",
+      "line": 6,
+      "sha256": "cf7893a106cb8d3bb257919039718d56fa98288dfdfad6fb2d09e6d3ca1a68f5"
+    },
+    "split_qkv_rmsnorm_rope_kernel": {
+      "path": "vllm_ascend/ops/triton/linearnorm/split_qkv_rmsnorm_rope.py",
+      "line": 25,
+      "sha256": "3e8c596002ec2e96673cadf2be5cfc5f917d23551d11da09d85e1cc387f56b46"
+    },
+    "split_qkv_rmsnorm_mrope_kernel": {
+      "path": "vllm_ascend/ops/triton/linearnorm/split_qkv_rmsnorm_mrope.py",
+      "line": 26,
+      "sha256": "f8f09120b635e45d7ba450fef0e766e053c3958d25d84f29dfb2efc0d90aa715"
+    },
+    "split_qkv_rmsnorm_rope_simt_kernel": {
+      "path": "vllm_ascend/ops/triton/linearnorm/split_qkv_rmsnorm_rope_simt.py",
+      "line": 39,
+      "sha256": "535889ab30b98364e2ed19c23e1e7a31d0b6264e1571a3c39bc6a3af43520a34"
+    },
+    "_triton_rope": {
+      "path": "vllm_ascend/ops/triton/rope.py",
+      "line": 169,
+      "sha256": "040e2f170b5f20efe252638483defc53d51ae27fb8de0529adb81ab3e5301fa9"
+    },
+    "_swiglu_quant_kernel": {
+      "path": "vllm_ascend/ops/triton/activation/swiglu_quant.py",
+      "line": 7,
+      "sha256": "5606cc891b45f22a18bcfb5d23795ef9e311ad7058df86e9c5cbb1e09eae87b0"
+    },
+    "_swiglustep_kernel": {
+      "path": "vllm_ascend/ops/triton/activation/swiglustep.py",
+      "line": 44,
+      "sha256": "3d39b0302f2638260ec35fa02f6fabc1e1e24936098d1cdb5e6fce1d018a6ada"
+    },
+    "apply_all_penalties_kernel": {
+      "path": "vllm_ascend/ops/triton/penalty.py",
+      "line": 30,
+      "sha256": "56bae7f677cf9543f57d15bbe49d40d8fcdf3408bdc67dccd8c3b7c25b66c3de"
+    },
+    "prepare_inputs_padded_kernel": {
+      "path": "vllm_ascend/ops/triton/spec_decode/utils.py",
+      "line": 21,
+      "sha256": "bed87c3c1ca3a29538a2e8afad0a769d1bd9e8295f97efaf27af40c3c25e075b"
+    },
+    "rejection_greedy_sample_spec_len_1_triton": {
+      "path": "vllm_ascend/ops/triton/reject_sample.py",
+      "line": 35,
+      "sha256": "a72e0a76f53e3a6db56d102c4c9d1024ba57d68005dc3db1402db208be5171fc"
+    },
+    "bonus_renew": {
+      "path": "vllm_ascend/ops/triton/reject_sample.py",
+      "line": 74,
+      "sha256": "96e38ae4477976648573c0766290dbc5296e9d122a06f91bf106f084572e6916"
+    },
+    "rejection_greedy_sample_triton": {
+      "path": "vllm_ascend/ops/triton/reject_sample.py",
+      "line": 86,
+      "sha256": "dd914917db15192ccbcfdc14b3832f0043065c9e65725eb2abf0e7f31052b025"
+    },
+    "sample_recovered_tokens_kernel": {
+      "path": "vllm_ascend/ops/triton/reject_sample.py",
+      "line": 398,
+      "sha256": "c8ad344453a033546458dc61eccac534b4914c8247765747fcb1fa7ab8062f03"
+    }
+  }
+}
