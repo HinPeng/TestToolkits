@@ -185,3 +185,11 @@ U2 的 `LAUNCH_ADAPTATION_UNPROVEN`、metadata 禁止跨值和 S6 的明确拒�
 完整结果、版本、逐算子覆盖和失败日志见
 [A5-37 基线验证报告](validation/A5-37_torch-213_20260930.md)。
 本次尚未开启动态复用或进行严格复用验收。
+
+## Q2/Q3 constexpr 纯分析测试
+
+无需 NPU、torch 或安装 Triton 的参数分类测试见
+[相邻 q2q3_constexpr_reuse 测试集](../q2q3_constexpr_reuse/README.md)。
+该测试集直接读取 Q2/Q3 原始算子，调用本地 Triton-Ascend checkout 的分析器，
+逐参数比较 RuntimeEligible / ScheduleReusable / StaticRequired / Unknown，
+并报告已知分类差异。它补充本目录的 host/设备测试；不替代数值与二进制重用验证。

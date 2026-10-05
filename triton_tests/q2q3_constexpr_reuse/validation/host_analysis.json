@@ -1,0 +1,3724 @@
+{
+  "schema": 1,
+  "mode": "source-analysis-only",
+  "python": "3.9.6",
+  "rule_version": 3,
+  "analyzer": {
+    "root": "/Users/hp/workspace/CodeSpace/Ascend/triton-ascend",
+    "revision": "3105ad280023074be867d748b20b61f3d3eef950",
+    "status": "M third_party/ascend/backend/reuse/README.md\n M third_party/ascend/backend/reuse/analysis.py\n M third_party/ascend/backend/reuse/bridge.py\n M third_party/ascend/backend/reuse/config.py\n M third_party/ascend/backend/reuse/dispatch.py\n M third_party/ascend/backend/reuse/dsl/facts.py\n M third_party/ascend/backend/reuse/dsl/uses.py\n M third_party/ascend/backend/reuse/guards.py\n M third_party/ascend/backend/reuse/model.py\n M third_party/ascend/backend/reuse/rules.py\n M third_party/ascend/backend/reuse/transform.py\n M third_party/ascend/unittest/reuse_ut/test_dispatch.py\n M third_party/ascend/unittest/reuse_ut/test_npu.py\n?? third_party/ascend/unittest/reuse_ut/test_eligibility.py\n?? third_party/ascend/unittest/reuse_ut/test_regressions.py"
+  },
+  "analyzer_sha256": {
+    "__init__.py": "14985c2da5f47858a2803e008f39f25b7b78edffa79c633e3f7db381c9ed1f6d",
+    "analysis.py": "39134a24c2bd8b7b413d127fee907bfc66e9324bdbefd06f1d88dd7aa787351f",
+    "binding.py": "d74931bd0cf4585689848c905e1ca3e1629f4583d89c0e20f7c04b244d8ee31c",
+    "bridge.py": "39302a06b22846e255bc64c60679609249ce3843376ecb44fbe815dfa1578f2f",
+    "config.py": "a7ccf4a01ef91b1fbe917cc2dfcee225891fe088989ae21679c2a7e3cbff61ff",
+    "context.py": "e1fff2bd0c451f7e6e4258e1d70e4bd135ea808335d2a16d9b39f70863affb22",
+    "dispatch.py": "a82f86001d9baf9699ed2f1456ef955c44ec9f65490ebb697b468eb42ef53352",
+    "dsl/__init__.py": "95bc971256851aebea5c17594c3e215925eb71fb0988c84b607da1ad52e07629",
+    "dsl/facts.py": "f1db8894a8ab913117397ed4790b72a4542b46fbf06fec5284df8a4839999c28",
+    "dsl/source.py": "a3a81531cf5104f26006e7259408f951ef158c010bbef03e65badcaefb640ec9",
+    "dsl/uses.py": "98e70635d02aeda6e58868f3b7c2f55c9e0a07c7aa37d717db39542cefe63bf5",
+    "guards.py": "5e585b839e445e82b7766c8060335f87ff2d2be4eee799ca4de3cbd3828dff24",
+    "identity.py": "fdef3960986e4a81e3b64e4a42815842fbd8981394bc065cdb4daa36dd34820c",
+    "model.py": "051756b7db21c79d3e09e96fb21ace6d791643ec0984fdbfc3a5496d4438463f",
+    "operations.py": "077acc7cf706ca40e99be24e1c22c36acb0e4c2a4061f4ac049b19f6c77ba506",
+    "protocol.py": "f688e8bb10621c0490e2451440b76caef9939d7f536f5e9ee12e2c7fc77f5e33",
+    "registry.py": "466169aae663f32e3ee51700599d6fbc956c1ba6dd6f04b540b8d71605ecc911",
+    "rules.py": "725d013511ebee40004658dac3a7d085e3a9cd3995b42db4b236eae80ef54465",
+    "service.py": "2d2c108013ca1ea5e365aee960d9d09a7bbd3a7fedcadb8152f257e2f07e74be",
+    "snapshot.py": "00b0e4bbf28b133304c8deaa5abeb0a64eaa5745321e31afc98910eea98708e6",
+    "transform.py": "3c2e12b225bf15bf280d481cafcbcf0936dab4d909c13dea114e9cbcf5313d74",
+    "worker.py": "a5fec890847c554339644433d230b0c02f7469ad6de2ef90fc9c0b387f604dac"
+  },
+  "language_sha256": {
+    "__init__.py": "58ebab210df54a4ea9600d056c49d436b2a43e02313bf39d990d6c4fd4927728",
+    "core.py": "9394c60071ea0bbca6c290c44a5a371b8b4a02683d529debc3be04401d93e198",
+    "math.py": "08abee21ce6230a873ed0831f70f9570b7ce39969dbf9b2f28ae1a1992ee1cc7",
+    "standard.py": "1a2a7b1706fe99659dd86b29d6397d603d7d0cfef4f827fe902a494728ccddc1",
+    "random.py": "f44a43511b97420e82438746d1730db6aea312619032077687fb36ffe23727ba"
+  },
+  "harness_sha256": {
+    "analysis_adapter.py": "087f81707bc413b09eccf1742553aa4d6fe6dad95ce1375030ac3ec257b3a646",
+    "cases.py": "f2f781a45c2bdefb30fb8a6d8501993ce02eac8145094939d2cd03657146b152",
+    "run_analysis.py": "c20f0bfe04798a76cd9178cc5ec57258175c82c4c5f32d752999d2422ee3c068"
+  },
+  "sources": {
+    "Q2TritonKernel": {
+      "root": "/Users/hp/workspace/CodeSpace/Ascend/TritonAscendTest/Q2TritonKernel",
+      "revision": "ebf78b205a87ecc5cd935a214bd2ef0fc176dcd9",
+      "status": ""
+    },
+    "Q3TritonKernel": {
+      "root": "/Users/hp/workspace/CodeSpace/Ascend/TritonAscendTest/Q3TritonKernel",
+      "revision": "e32d476c84bed89e58de2ca9eefd151104723fca",
+      "status": ""
+    }
+  },
+  "summary": {
+    "profiles": 32,
+    "definitions": 22,
+    "parameters": 132,
+    "matching": 82,
+    "mismatching": 50,
+    "known_gaps": {
+      "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC": 28,
+      "G1_SHAPE_IS_NOT_STATIC_PROOF": 22
+    },
+    "expected_classes": {
+      "StaticRequired": 43,
+      "RuntimeEligible": 41,
+      "Unknown": 48
+    },
+    "actual_classes": {
+      "StaticRequired": 65,
+      "RuntimeEligible": 13,
+      "Unknown": 54
+    }
+  },
+  "cases": [
+    {
+      "id": "q2_store_lowrank",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_store_label_cache_triton_kernel",
+      "path": "Q2TritonKernel/src/kernels/store_lowrank.py",
+      "definition_line": 11,
+      "file_sha256": "5a08c416ac8680079c1409016da53a6d17c6a5ec3935e8312fa667a87f9807b6",
+      "jit_sha256": "56b2e4158ecbb26f4912b6566072ea32b4fad4fc437465a6f45f2906dd4c77bc",
+      "arguments": {
+        "label_cache_ptr": {
+          "pointer": "float32"
+        },
+        "key_lr_ptr": {
+          "pointer": "float32"
+        },
+        "block_idx_list_ptr": {
+          "pointer": "int32"
+        },
+        "token_idx_list_ptr": {
+          "pointer": "int32"
+        },
+        "head_num": 8,
+        "head_dim": 64,
+        "token_num": 37,
+        "l_stride_b": 8192,
+        "l_stride_h": 1024,
+        "l_stride_t": 64,
+        "l_stride_d": 1,
+        "k_stride_s": 512,
+        "k_stride_h": 64,
+        "k_stride_d": 1,
+        "BATCH_BLOCK_NUM": 16
+      },
+      "dynamic": [
+        "token_num"
+      ],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "head_num",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "真实 head 数，完整 arange 范围随值改变",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 23
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "head_dim",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "真实 head 维度，完整 arange 范围随值改变",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 25
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "token_num",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "l_stride_b",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "l_stride_h",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "l_stride_t",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "l_stride_d",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "k_stride_s",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "k_stride_h",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "k_stride_d",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "BATCH_BLOCK_NUM",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 21
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q2_paged_kv",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_store_paged_kv_cache_kernel",
+      "path": "Q2TritonKernel/src/kernels/store_paged_kv_cache.py",
+      "definition_line": 9,
+      "file_sha256": "c264b9fc3614b56f411777041a67a6d920a1da029af98b5deb214b706efc68c5",
+      "jit_sha256": "01f9e335004e25a792f1be9432db49363a08f7c4b3bf9f169d5e626553e111a8",
+      "arguments": {
+        "k_ptr": {
+          "pointer": "float32"
+        },
+        "v_ptr": {
+          "pointer": "float32"
+        },
+        "key_cache_ptr": {
+          "pointer": "float32"
+        },
+        "value_cache_ptr": {
+          "pointer": "float32"
+        },
+        "block_table_ptr": {
+          "pointer": "int32"
+        },
+        "cu_seqlens_ptr": {
+          "pointer": "int32"
+        },
+        "kv_lens_ptr": {
+          "pointer": "int32"
+        },
+        "batch_size": 3,
+        "stride_k_tok": 512,
+        "stride_k_head": 64,
+        "stride_k_dim": 1,
+        "stride_v_tok": 512,
+        "stride_v_head": 64,
+        "stride_v_dim": 1,
+        "stride_kc_blk": 8192,
+        "stride_kc_head": 1024,
+        "stride_kc_tok": 64,
+        "stride_kc_dim": 1,
+        "stride_vc_blk": 8192,
+        "stride_vc_head": 1024,
+        "stride_vc_tok": 64,
+        "stride_vc_dim": 1,
+        "stride_bt_batch": 8,
+        "stride_bt_blk": 1,
+        "num_kv_heads": 8,
+        "head_dim": 64,
+        "block_size": 16,
+        "CHUNK_SIZE": 32,
+        "IS_DECODE": true,
+        "HAS_KV_LENS": true
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "head_dim",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "无 head 维度 mask 的完整列范围，决定真实计算维度",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 83
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 92
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 102
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 111
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 79
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "block_size",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "整数整除/取余计算物理 KV block 地址；并非 arange 的 tile",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 83
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 92
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 102
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 111
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "CHUNK_SIZE",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "CDIV_TYPE_PROOF_MISSING",
+              "jit_relative_line": 50
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 83
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 92
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 102
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 111
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 76
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "IS_DECODE",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 38
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "HAS_KV_LENS",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 47
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_attention_preprocess",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "kernel_da_bwd_d",
+      "path": "Q2TritonKernel/src/kernels/dllm_attention/bwd_d.py",
+      "definition_line": 14,
+      "file_sha256": "e61107d3b5c82f6da0a31b5129700ec9f48cff8aa985e53229192d66581c0803",
+      "jit_sha256": "b7e35d73b88c3d0e0e761b8d7ddd33f85d4293865d3803850232b8bdf977663a",
+      "arguments": {
+        "fp32o": {
+          "pointer": "float32"
+        },
+        "do": {
+          "pointer": "float32"
+        },
+        "d": {
+          "pointer": "float32"
+        },
+        "TOTAL_S": 129,
+        "N": 4,
+        "H": 64,
+        "STRIDE_O_S": 256,
+        "STRIDE_O_N": 64,
+        "STRIDE_O_H": 1,
+        "STRIDE_D_S": 1,
+        "STRIDE_D_N": 129,
+        "BLOCK_R": 32
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "N",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 24
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "H",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "完整 head 维度上的浮点点积归约，改变 H 改变结果",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 24
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 22
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "STRIDE_O_S",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 24
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "STRIDE_O_N",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 24
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "STRIDE_O_H",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R5 tl.static_assert 的条件必须编译期求值",
+          "required_reason": "STATIC_STATIC_ASSERT",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 24
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            },
+            {
+              "code": "STATIC_STATIC_ASSERT",
+              "jit_relative_line": 15
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "STRIDE_D_S",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R5 tl.static_assert 的条件必须编译期求值",
+          "required_reason": "STATIC_STATIC_ASSERT",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "STATIC_STATIC_ASSERT",
+              "jit_relative_line": 16
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BLOCK_R",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "CDIV_TYPE_PROOF_MISSING",
+              "jit_relative_line": 18
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 24
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 26
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 32
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 36
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 37
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q2_silu",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_silu_fwd_kernel",
+      "path": "Q2TritonKernel/src/kernels/activation/silu.py",
+      "definition_line": 35,
+      "file_sha256": "1a0e1638443c8135a952a9c5a5ddd9b7cb9dfba04a2f08eef6d8b8c8e413bd8b",
+      "jit_sha256": "8e647f290d59dd067698b5ba140646042d521619cb8e09ad6ad3b9222d84d3d9",
+      "arguments": {
+        "x": {
+          "pointer": "float32"
+        },
+        "y": {
+          "pointer": "float32"
+        },
+        "stride_row": 128,
+        "n_rows": 17,
+        "n_cols": 96,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_M": 4
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "BLOCK_SIZE_N",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 25
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 26
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 21
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "BLOCK_SIZE_M",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 25
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 26
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 17
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q2_swiglu",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_swiglu_fwd_kernel",
+      "path": "Q2TritonKernel/src/kernels/activation/swiglu.py",
+      "definition_line": 37,
+      "file_sha256": "051156785c1d8fdcb9633d54ea34d1d9154db9e1d4c9d608ebec5da2163fcd37",
+      "jit_sha256": "e9a2e72a724687d8b2b569c04e8b94422d345e4fa61dfbfc19c4dd7f179a9e9e",
+      "arguments": {
+        "a": {
+          "pointer": "float32"
+        },
+        "b": {
+          "pointer": "float32"
+        },
+        "c": {
+          "pointer": "float32"
+        },
+        "stride_row": 128,
+        "n_rows": 17,
+        "n_cols": 96,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_M": 4
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "BLOCK_SIZE_N",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 26
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 27
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 22
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "BLOCK_SIZE_M",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 26
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 27
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 18
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q2_rmsnorm",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_rmsnorm_infer_kernel",
+      "path": "Q2TritonKernel/src/kernels/rmsnorm.py",
+      "definition_line": 49,
+      "file_sha256": "ba554fd326809539d0055587164184073f90dd0088e882bc9ed76a5cd8ee0efe",
+      "jit_sha256": "f1609ef42831df64235760380b455d7ca79e64520974c6128bf8a075ca9b5f6f",
+      "arguments": {
+        "X_ptr": {
+          "pointer": "float32"
+        },
+        "Y_ptr": {
+          "pointer": "float32"
+        },
+        "W_ptr": {
+          "pointer": "float32"
+        },
+        "stride_x_row": 512,
+        "stride_y_row": 512,
+        "n_rows": 17,
+        "n_cols": 384,
+        "eps": 1e-05,
+        "BLOCK_SIZE_M": 4,
+        "BLOCK_SIZE_N": 128
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "BLOCK_SIZE_M",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 34
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 34
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 36
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 21
+            },
+            {
+              "code": "STATIC_ZEROS",
+              "jit_relative_line": 24
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "BLOCK_SIZE_N",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "列 tile 改变块内 sum 与块间累加分组，首版保留浮点归约顺序 (§4.2 S4)",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 27
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_position_ids",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "prepare_position_ids_kernel",
+      "path": "Q2TritonKernel/src/kernels/fla/ops/utils/index.py",
+      "definition_line": 25,
+      "file_sha256": "2c13dbe1b690204e79f0be73c9b6f3103cd018d040b4d077c70c2749793d064d",
+      "jit_sha256": "9e95c1a65f0863f9bb858746766effb6e16212679f5b27f948484a577a1c658d",
+      "arguments": {
+        "y": {
+          "pointer": "int32"
+        },
+        "cu_seqlens": {
+          "pointer": "int32"
+        },
+        "B": 128
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "B",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 7
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_load_predicate",
+      "collection": "Q2TritonKernel",
+      "kind": "helper",
+      "kernel": "load_with_pred_1d",
+      "path": "Q2TritonKernel/src/kernels/utils.py",
+      "definition_line": 53,
+      "file_sha256": "4f4dff18119443809c91c4137dbcc77430168c8157a40756273cf8a914e3c801",
+      "jit_sha256": "f1658f031727e87c524e526bacda5598ebf67ecc393ef2dab88b46e60e578705",
+      "arguments": {
+        "ptr": {
+          "pointer": "int32"
+        },
+        "skip_boundary_check": false,
+        "mask": true,
+        "other": -1
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "skip_boundary_check",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 2
+            },
+            {
+              "code": "UNARY_NOT_TYPE_PROOF_MISSING",
+              "jit_relative_line": 2
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_store_predicate",
+      "collection": "Q2TritonKernel",
+      "kind": "helper",
+      "kernel": "store_with_pred_1d",
+      "path": "Q2TritonKernel/src/kernels/utils.py",
+      "definition_line": 61,
+      "file_sha256": "4f4dff18119443809c91c4137dbcc77430168c8157a40756273cf8a914e3c801",
+      "jit_sha256": "ce0bc933133701a8d0294c18fcb2e5919ef6da8cbc9d8e96dee9c73c615c2519",
+      "arguments": {
+        "ptr": {
+          "pointer": "int32"
+        },
+        "value": 7,
+        "skip_boundary_check": false,
+        "mask": true
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "skip_boundary_check",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 2
+            },
+            {
+              "code": "UNARY_NOT_TYPE_PROOF_MISSING",
+              "jit_relative_line": 2
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_rope_extension",
+      "collection": "Q2TritonKernel",
+      "kind": "helper",
+      "kernel": "_compute_rope",
+      "path": "Q2TritonKernel/src/kernels/rope.py",
+      "definition_line": 71,
+      "file_sha256": "94c2c1f8745e8dc8d681e5bc95e1f2a5a7aedd9268d46338cd15c9f996afb11d",
+      "jit_sha256": "d195c6746fe004849ef98a134fbaefecaa6c117dadbf5c19c2e35afa8354768a",
+      "arguments": {
+        "x": 0.5,
+        "sin_tile": 0.5,
+        "cos_tile": 0.5,
+        "head_num": 8,
+        "half_rope_dim": 32,
+        "TOKEN_BLOCK_SIZE": 4,
+        "inverse": false
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "head_num",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "缺少 CANN extract_slice/insert_slice 摘要，未完成后续使用链",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "OPERATION_SUMMARY_MISSING",
+              "jit_relative_line": 10
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "half_rope_dim",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "缺少 CANN extract_slice/insert_slice 摘要，未完成后续使用链",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "OPERATION_SUMMARY_MISSING",
+              "jit_relative_line": 10
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "TOKEN_BLOCK_SIZE",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "缺少 CANN extract_slice/insert_slice 摘要，未完成后续使用链",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "OPERATION_SUMMARY_MISSING",
+              "jit_relative_line": 10
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "inverse",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "缺少 CANN extract_slice/insert_slice 摘要，未完成后续使用链",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "OPERATION_SUMMARY_MISSING",
+              "jit_relative_line": 10
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_rope_separated",
+      "collection": "Q2TritonKernel",
+      "kind": "helper",
+      "kernel": "_compute_rope_separated",
+      "path": "Q2TritonKernel/src/kernels/rope.py",
+      "definition_line": 103,
+      "file_sha256": "94c2c1f8745e8dc8d681e5bc95e1f2a5a7aedd9268d46338cd15c9f996afb11d",
+      "jit_sha256": "a7efcb15edb2f3b0c813de65b0c6ee299aa4c9c1ec450bf1cb07b890fe89f90d",
+      "arguments": {
+        "x1": 0.5,
+        "x2": 0.25,
+        "sin_tile": 0.5,
+        "cos_tile": 0.5,
+        "inverse": false
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "inverse",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 8
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_sdpa_dtype",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "kernel_sdpa_bwd_d",
+      "path": "Q2TritonKernel/src/kernels/sdpa.py",
+      "definition_line": 440,
+      "file_sha256": "441610698595056ff64ee3ca36e0f349d7ef3add36fbd3f84e798d3a3bd4b795",
+      "jit_sha256": "64c1dd4205df48ac19ae596717ea22648504ee51ebc378cbbd0aede6d5345d46",
+      "arguments": {
+        "o": {
+          "pointer": "float32"
+        },
+        "do": {
+          "pointer": "float32"
+        },
+        "d": {
+          "pointer": "float32"
+        },
+        "B": 2,
+        "N": 4,
+        "S": 129,
+        "H": 64,
+        "STRIDE_O_B": 33024,
+        "STRIDE_O_N": 8256,
+        "STRIDE_O_S": 64,
+        "STRIDE_O_H": 1,
+        "STRIDE_D_B": 516,
+        "STRIDE_D_N": 129,
+        "STRIDE_D_S": 1,
+        "BLOCK_R": 32,
+        "LOW_TYPE": {
+          "dtype": "bfloat16"
+        },
+        "HIGH_TYPE": {
+          "dtype": "float32"
+        }
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "B",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 41
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "N",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 41
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "S",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "S 进入 tl.cdiv，当前尚无其动态整数类型证明",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "CDIV_TYPE_PROOF_MISSING",
+              "jit_relative_line": 21
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 41
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "H",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "完整 head 维度上的浮点归约",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 26
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "STRIDE_O_B",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "STRIDE_O_N",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "STRIDE_O_S",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "STRIDE_O_H",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "STRIDE_D_B",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 41
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "STRIDE_D_N",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 41
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "STRIDE_D_S",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 41
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "BLOCK_R",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "CDIV_TYPE_PROOF_MISSING",
+              "jit_relative_line": 21
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 28
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 41
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 31
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 38
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 41
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 42
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 43
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "LOW_TYPE",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "未使用的 dtype constexpr 不在首版整数动态化支持范围",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "TYPE_OR_USE_NOT_SUPPORTED",
+              "jit_relative_line": 0
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "HIGH_TYPE",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R4 传入 .to(HIGH_TYPE) 的 dtype 必须静态",
+          "required_reason": "STATIC_DTYPE",
+          "reasons": [
+            {
+              "code": "STATIC_DTYPE",
+              "jit_relative_line": 47
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_conv_dh0",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "compute_dh0_kernel",
+      "path": "Q2TritonKernel/src/kernels/fla/modules/causal_conv1d_bwd.py",
+      "definition_line": 349,
+      "file_sha256": "9d87c5e24abd3a40c48071ca52865597ba17bd4c781a2f2aa8a639d7fcafd862",
+      "jit_sha256": "eca64045cba7249d0f2565a64de3bdebf15e757925489623e203f5b5ea739b0e",
+      "arguments": {
+        "dy": {
+          "pointer": "float32"
+        },
+        "y": {
+          "pointer": "float32"
+        },
+        "weight": {
+          "pointer": "float32"
+        },
+        "dh0": {
+          "pointer": "float32"
+        },
+        "cu_seqlens": {
+          "pointer": "int32"
+        },
+        "stride_dy_n": 8192,
+        "stride_dy_t": 64,
+        "T": 128,
+        "D": 64,
+        "W": 4,
+        "BD": 32,
+        "USE_ACTIVATION": true,
+        "IS_VARLEN": false
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "D",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 16
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "W",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 16
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BD",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 16
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "USE_ACTIVATION",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 16
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "IS_VARLEN",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 16
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_flat_offset",
+      "collection": "Q3TritonKernel",
+      "kind": "helper",
+      "kernel": "_flat_offset",
+      "path": "Q3TritonKernel/src/kernels/fla/modules/activations.py",
+      "definition_line": 101,
+      "file_sha256": "31b24469d4ce08b579f45e61b887cfda9d1d669fdcf88eeeeda9ca43e37a8bca",
+      "jit_sha256": "e1271c01af4821f2652fbe62e554f98820c8de667b13baca345b9c06c1edf7fd",
+      "arguments": {
+        "offs": 17,
+        "D": 32,
+        "stride": 64,
+        "IS_LINEAR": true
+      },
+      "dynamic": [
+        "D"
+      ],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "D",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "即使 IS_LINEAR=True，仍检查另一分支中的整除/取余地址链",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "IS_LINEAR",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 7
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_position_embeddings",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "_add_position_embeddings_kernel",
+      "path": "Q3TritonKernel/src/kernels/recsys_example/add_position_embeddings/add_position_embeddings.py",
+      "definition_line": 53,
+      "file_sha256": "a65b479ca1c200f953515cda592f20bf8a9c4a0cc0846ccfed9614d22fa9046d",
+      "jit_sha256": "d07f41acfb0ae07f3accf76f8ee4c56d762b2281437b5a6cc7edcd446e5b5c7d",
+      "arguments": {
+        "Jagged": {
+          "pointer": "float32"
+        },
+        "Dense": {
+          "pointer": "float32"
+        },
+        "Out": {
+          "pointer": "float32"
+        },
+        "seq_offsets": {
+          "pointer": "int32"
+        },
+        "high_inds": {
+          "pointer": "int32"
+        },
+        "ind_offsets": {
+          "pointer": "int32"
+        },
+        "AUTOTUNE_MAX_SEQ_LEN": 128,
+        "D": 96,
+        "scale": 0.5,
+        "stride_jn": 96,
+        "stride_dk": 96,
+        "stride_on": 96,
+        "SCALE_JAGGED": true,
+        "BLOCK_D": 64,
+        "BLOCK_N": 32
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "SCALE_JAGGED",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 50
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BLOCK_D",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 45
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 46
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 49
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 55
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 56
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 41
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "BLOCK_N",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 45
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 46
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 49
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 55
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 56
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 33
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q3_jagged_to_dense",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "triton_jagged_to_dense",
+      "path": "Q3TritonKernel/src/kernels/fbgemm/triton_jagged_to_dense/triton_jagged_to_dense.py",
+      "definition_line": 71,
+      "file_sha256": "784c1d58fae5906868e4faf1d2b13450ce9aa4071d48fe095c82ba6c4d31632c",
+      "jit_sha256": "83b045bf1e50d0e041f54795a2eed078c72845d00c5c2ed6c78be5efe6a698e2",
+      "arguments": {
+        "jagged_value_ptr": {
+          "pointer": "float32"
+        },
+        "output_dense_ptr": {
+          "pointer": "float32"
+        },
+        "operation_dense": {
+          "pointer": "float32"
+        },
+        "jagged_offsets_ptr": {
+          "pointer": "int32"
+        },
+        "dense_indices_ptr": {
+          "pointer": "int32"
+        },
+        "jagged_value_row_stride": 64,
+        "dense_col_stride": 1,
+        "dense_row_stride": 64,
+        "dense_matrix_stride": 4096,
+        "JAGGED_DIM": 2,
+        "thread_block_row_size": 32,
+        "thread_block_col_size": 32,
+        "operation_function": "add"
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "JAGGED_DIM",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 29
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "thread_block_row_size",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 68
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 73
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 81
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 53
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "thread_block_col_size",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 68
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 73
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 81
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 61
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "operation_function",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "字符串 constexpr 选择 add/mul/无融合分支",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 45
+            },
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 50
+            },
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 71
+            },
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 75
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 45
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 50
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 71
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 75
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_silu",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "_silu_forward",
+      "path": "Q3TritonKernel/src/kernels/recsys_example/silu/silu.py",
+      "definition_line": 29,
+      "file_sha256": "7f7eb4d6d29d0f8fef83a3a7e1e9f3d95a5ed65db6ec4dc01a3849de9ad02581",
+      "jit_sha256": "87d9856b49d5086dc283d85688f12a0a6a228fc2c5275528b87d277275e82dc2",
+      "arguments": {
+        "output_ptr": {
+          "pointer": "float32"
+        },
+        "input_ptr": {
+          "pointer": "float32"
+        },
+        "x_size": 10001,
+        "x_block_size": 8192
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "x_block_size",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 9
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 10
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 13
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 8
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 11
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q3_layernorm",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "_layer_norm_fwd",
+      "path": "Q3TritonKernel/src/kernels/recsys_example/layer_norm/layer_norm.py",
+      "definition_line": 37,
+      "file_sha256": "a8246c4146d36c320b97c2ef0a3dc379707a627806f61f117fd909e5edf1a6e1",
+      "jit_sha256": "717327a7e764837319d74b8b95b321c608108528d9adaa8b9e6526639b9ebd33",
+      "arguments": {
+        "X": {
+          "pointer": "float32"
+        },
+        "Y": {
+          "pointer": "float32"
+        },
+        "Mean": {
+          "pointer": "float32"
+        },
+        "Rstd": {
+          "pointer": "float32"
+        },
+        "D": 96,
+        "eps": 1e-05,
+        "stride_x": 128,
+        "stride_y": 128,
+        "TRAINING": true,
+        "BLOCK_D": 128,
+        "COMPUTE_MEAN_AND_RSTD": true
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "TRAINING",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "分析在浮点除法处中断，尚未读到 TRAINING 分支",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "INTEGER_OPERATION_NOT_SUPPORTED",
+              "jit_relative_line": 21
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BLOCK_D",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "改变块内浮点归约树；首版保留数值顺序",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 18
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 17
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "COMPUTE_MEAN_AND_RSTD",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 20
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_l2norm",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "l2norm_fwd_kernel1",
+      "path": "Q3TritonKernel/src/kernels/fla/modules/l2norm.py",
+      "definition_line": 42,
+      "file_sha256": "703fa8a6e86f1e6fd776751ad78d629eb2ded00d5c6546a405784d3db4d85ea3",
+      "jit_sha256": "2c6abfc60a05dbba332d061595fdd93e89cf20647e69fa7e3cfacda43ea639e8",
+      "arguments": {
+        "x": {
+          "pointer": "float32"
+        },
+        "y": {
+          "pointer": "float32"
+        },
+        "rstd": {
+          "pointer": "float32"
+        },
+        "eps": 1e-05,
+        "D": 96,
+        "BD": 128,
+        "T": 1024,
+        "BR": 4
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "D",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "sqrt 无摘要，无法完成全部地址/mask 使用链",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 14
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 15
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 20
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BD",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "改变浮点 sum 归约树，首版保留数值顺序",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 20
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 17
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "T",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "前一分支 sqrt 无摘要，尚未读到后一分支 T 的 static_assert",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "OPERATION_SUMMARY_MISSING",
+              "jit_relative_line": 21
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BR",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 12
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_topk_partial",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "_topk_index_partial_kernel",
+      "path": "Q3TritonKernel/src/kernels/minimax_m3/topk_index_partial_kernel.py",
+      "definition_line": 43,
+      "file_sha256": "64084baa2b27d3026909e3cb4b67a4e476a847332abc2c05defc9c7ded3a17b2",
+      "jit_sha256": "2bb0d533204cbc4ff0f48151a131b2c643a943623666a7de0e0eaccb326a89c2",
+      "arguments": {
+        "s_ptr": {
+          "pointer": "float32"
+        },
+        "ts_partial_ptr": {
+          "pointer": "float32"
+        },
+        "ti_partial_ptr": {
+          "pointer": "int32"
+        },
+        "seq_lens": {
+          "pointer": "int32"
+        },
+        "block_size": 128,
+        "topk": 16,
+        "chunk_blocks": 64,
+        "decode_query_len": 2,
+        "stride_s_h": 1024,
+        "stride_s_b": 4096,
+        "stride_s_k": 1,
+        "stride_ts_c": 128,
+        "stride_ts_h": 32,
+        "stride_ts_b": 16,
+        "stride_ts_t": 1,
+        "stride_ti_c": 128,
+        "stride_ti_h": 32,
+        "stride_ti_b": 16,
+        "stride_ti_t": 1,
+        "BLOCK_SIZE_K": 64,
+        "BLOCK_SIZE_T": 16
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "block_size",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 31
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "topk",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R5 tl.static_assert 的条件必须编译期求值",
+          "required_reason": "STATIC_STATIC_ASSERT",
+          "reasons": [
+            {
+              "code": "STATIC_STATIC_ASSERT",
+              "jit_relative_line": 8
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BLOCK_SIZE_K",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R5 tl.static_assert 的条件必须编译期求值",
+          "required_reason": "STATIC_STATIC_ASSERT",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 22
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 30
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 20
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 25
+            },
+            {
+              "code": "STATIC_FULL",
+              "jit_relative_line": 23
+            },
+            {
+              "code": "STATIC_FULL",
+              "jit_relative_line": 24
+            },
+            {
+              "code": "STATIC_STATIC_ASSERT",
+              "jit_relative_line": 8
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BLOCK_SIZE_T",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "决定无 mask 输出槽数量与 top-k 归并结果布局；不是已获准的逐元素调度 tile",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 21
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_pack",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "packunpack_sequence_kernel",
+      "path": "Q3TritonKernel/src/kernels/fla/ops/utils/pack.py",
+      "definition_line": 29,
+      "file_sha256": "a3481f0aa79e8d089a2667ec4d61c2a1dbf6d1592105e300fb0876b6d4747055",
+      "jit_sha256": "28ac5087a2abf96223ecf2f73200429a2167611185498eade48bc2991fc03236",
+      "arguments": {
+        "x": {
+          "pointer": "float32"
+        },
+        "y": {
+          "pointer": "float32"
+        },
+        "cu_seqlens": {
+          "pointer": "int32"
+        },
+        "S": 128,
+        "D": 64,
+        "BD": 64,
+        "PADDING_SIDE": "left",
+        "PACK": true
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "BD",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 11
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "PADDING_SIDE",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 11
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "PACK",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 11
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_pooling",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "mean_pooling_fwd_kernel",
+      "path": "Q3TritonKernel/src/kernels/fla/ops/utils/pooling.py",
+      "definition_line": 30,
+      "file_sha256": "f2549e5e9215f32ac3767d210688c52e917b27ab41b2f6b652904e7f32401874",
+      "jit_sha256": "3c0752151c4099b73f38a8425ab2b3f7b132332f4d9451feaf179b152e4d3be3",
+      "arguments": {
+        "x": {
+          "pointer": "float32"
+        },
+        "o": {
+          "pointer": "float32"
+        },
+        "cu_seqlens": {
+          "pointer": "int32"
+        },
+        "chunk_indices": {
+          "pointer": "int32"
+        },
+        "T": 129,
+        "H": 4,
+        "D": 64,
+        "BT": 32,
+        "BD": 32,
+        "IS_VARLEN": false
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "H",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 13
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "D",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 13
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BT",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 13
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BD",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 13
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "IS_VARLEN",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "当前 DSL 不支持元组解包赋值，使用链不完整，应保守保留",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "ASSIGNMENT_SUMMARY_MISSING",
+              "jit_relative_line": 13
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_store_lowrank_tail",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_store_label_cache_triton_kernel",
+      "path": "Q2TritonKernel/src/kernels/store_lowrank.py",
+      "definition_line": 11,
+      "file_sha256": "5a08c416ac8680079c1409016da53a6d17c6a5ec3935e8312fa667a87f9807b6",
+      "jit_sha256": "56b2e4158ecbb26f4912b6566072ea32b4fad4fc437465a6f45f2906dd4c77bc",
+      "arguments": {
+        "label_cache_ptr": {
+          "pointer": "float32"
+        },
+        "key_lr_ptr": {
+          "pointer": "float32"
+        },
+        "block_idx_list_ptr": {
+          "pointer": "int32"
+        },
+        "token_idx_list_ptr": {
+          "pointer": "int32"
+        },
+        "head_num": 8,
+        "head_dim": 64,
+        "token_num": 1,
+        "l_stride_b": 8192,
+        "l_stride_h": 1024,
+        "l_stride_t": 64,
+        "l_stride_d": 2,
+        "k_stride_s": 512,
+        "k_stride_h": 64,
+        "k_stride_d": 2,
+        "BATCH_BLOCK_NUM": 16
+      },
+      "dynamic": [
+        "token_num"
+      ],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "head_num",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "真实 head 数，完整 arange 范围随值改变",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 23
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "head_dim",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "真实 head 维度，完整 arange 范围随值改变",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 25
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "token_num",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "l_stride_b",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "l_stride_h",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "l_stride_t",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "l_stride_d",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 36
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "k_stride_s",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "k_stride_h",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "k_stride_d",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "BATCH_BLOCK_NUM",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 35
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 21
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q2_paged_kv_prefill",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_store_paged_kv_cache_kernel",
+      "path": "Q2TritonKernel/src/kernels/store_paged_kv_cache.py",
+      "definition_line": 9,
+      "file_sha256": "c264b9fc3614b56f411777041a67a6d920a1da029af98b5deb214b706efc68c5",
+      "jit_sha256": "01f9e335004e25a792f1be9432db49363a08f7c4b3bf9f169d5e626553e111a8",
+      "arguments": {
+        "k_ptr": {
+          "pointer": "float32"
+        },
+        "v_ptr": {
+          "pointer": "float32"
+        },
+        "key_cache_ptr": {
+          "pointer": "float32"
+        },
+        "value_cache_ptr": {
+          "pointer": "float32"
+        },
+        "block_table_ptr": {
+          "pointer": "int32"
+        },
+        "cu_seqlens_ptr": {
+          "pointer": "int32"
+        },
+        "kv_lens_ptr": {
+          "pointer": "int32"
+        },
+        "batch_size": 3,
+        "stride_k_tok": 512,
+        "stride_k_head": 64,
+        "stride_k_dim": 1,
+        "stride_v_tok": 512,
+        "stride_v_head": 64,
+        "stride_v_dim": 1,
+        "stride_kc_blk": 8192,
+        "stride_kc_head": 1024,
+        "stride_kc_tok": 64,
+        "stride_kc_dim": 1,
+        "stride_vc_blk": 8192,
+        "stride_vc_head": 1024,
+        "stride_vc_tok": 64,
+        "stride_vc_dim": 1,
+        "stride_bt_batch": 8,
+        "stride_bt_blk": 1,
+        "num_kv_heads": 8,
+        "head_dim": 64,
+        "block_size": 16,
+        "CHUNK_SIZE": 32,
+        "IS_DECODE": false,
+        "HAS_KV_LENS": false
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "head_dim",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "无 head 维度 mask 的完整列范围，决定真实计算维度",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 83
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 92
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 102
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 111
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 79
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "block_size",
+          "expected": "RuntimeEligible",
+          "actual": "Unknown",
+          "why": "整数整除/取余计算物理 KV block 地址；并非 arange 的 tile",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 83
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 92
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 102
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 111
+            }
+          ],
+          "matches": false,
+          "known_gap": "G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC"
+        },
+        {
+          "parameter": "CHUNK_SIZE",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "CDIV_TYPE_PROOF_MISSING",
+              "jit_relative_line": 50
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 83
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 92
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 102
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 111
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 76
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "IS_DECODE",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 38
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "HAS_KV_LENS",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 47
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_load_predicate_unchecked",
+      "collection": "Q2TritonKernel",
+      "kind": "helper",
+      "kernel": "load_with_pred_1d",
+      "path": "Q2TritonKernel/src/kernels/utils.py",
+      "definition_line": 53,
+      "file_sha256": "4f4dff18119443809c91c4137dbcc77430168c8157a40756273cf8a914e3c801",
+      "jit_sha256": "f1658f031727e87c524e526bacda5598ebf67ecc393ef2dab88b46e60e578705",
+      "arguments": {
+        "ptr": {
+          "pointer": "int32"
+        },
+        "skip_boundary_check": true,
+        "mask": true,
+        "other": -1
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "skip_boundary_check",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 2
+            },
+            {
+              "code": "UNARY_NOT_TYPE_PROOF_MISSING",
+              "jit_relative_line": 2
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_rope_separated_inverse",
+      "collection": "Q2TritonKernel",
+      "kind": "helper",
+      "kernel": "_compute_rope_separated",
+      "path": "Q2TritonKernel/src/kernels/rope.py",
+      "definition_line": 103,
+      "file_sha256": "94c2c1f8745e8dc8d681e5bc95e1f2a5a7aedd9268d46338cd15c9f996afb11d",
+      "jit_sha256": "a7efcb15edb2f3b0c813de65b0c6ee299aa4c9c1ec450bf1cb07b890fe89f90d",
+      "arguments": {
+        "x1": 0.5,
+        "x2": 0.25,
+        "sin_tile": 0.5,
+        "cos_tile": 0.5,
+        "inverse": true
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "inverse",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 8
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_flat_offset_strided",
+      "collection": "Q3TritonKernel",
+      "kind": "helper",
+      "kernel": "_flat_offset",
+      "path": "Q3TritonKernel/src/kernels/fla/modules/activations.py",
+      "definition_line": 101,
+      "file_sha256": "31b24469d4ce08b579f45e61b887cfda9d1d669fdcf88eeeeda9ca43e37a8bca",
+      "jit_sha256": "e1271c01af4821f2652fbe62e554f98820c8de667b13baca345b9c06c1edf7fd",
+      "arguments": {
+        "offs": 17,
+        "D": 64,
+        "stride": 64,
+        "IS_LINEAR": false
+      },
+      "dynamic": [
+        "D"
+      ],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "D",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "即使 IS_LINEAR=True，仍检查另一分支中的整除/取余地址链",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "IS_LINEAR",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 7
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_position_embeddings_unscaled",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "_add_position_embeddings_kernel",
+      "path": "Q3TritonKernel/src/kernels/recsys_example/add_position_embeddings/add_position_embeddings.py",
+      "definition_line": 53,
+      "file_sha256": "a65b479ca1c200f953515cda592f20bf8a9c4a0cc0846ccfed9614d22fa9046d",
+      "jit_sha256": "d07f41acfb0ae07f3accf76f8ee4c56d762b2281437b5a6cc7edcd446e5b5c7d",
+      "arguments": {
+        "Jagged": {
+          "pointer": "float32"
+        },
+        "Dense": {
+          "pointer": "float32"
+        },
+        "Out": {
+          "pointer": "float32"
+        },
+        "seq_offsets": {
+          "pointer": "int32"
+        },
+        "high_inds": {
+          "pointer": "int32"
+        },
+        "ind_offsets": {
+          "pointer": "int32"
+        },
+        "AUTOTUNE_MAX_SEQ_LEN": 128,
+        "D": 96,
+        "scale": 0.5,
+        "stride_jn": 96,
+        "stride_dk": 96,
+        "stride_on": 96,
+        "SCALE_JAGGED": false,
+        "BLOCK_D": 64,
+        "BLOCK_N": 32
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "SCALE_JAGGED",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 50
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BLOCK_D",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 45
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 46
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 49
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 55
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 56
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 41
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "BLOCK_N",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 45
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 46
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 49
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 55
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 56
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 33
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q3_jagged_to_dense_no_fusion",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "triton_jagged_to_dense",
+      "path": "Q3TritonKernel/src/kernels/fbgemm/triton_jagged_to_dense/triton_jagged_to_dense.py",
+      "definition_line": 71,
+      "file_sha256": "784c1d58fae5906868e4faf1d2b13450ce9aa4071d48fe095c82ba6c4d31632c",
+      "jit_sha256": "83b045bf1e50d0e041f54795a2eed078c72845d00c5c2ed6c78be5efe6a698e2",
+      "arguments": {
+        "jagged_value_ptr": {
+          "pointer": "float32"
+        },
+        "output_dense_ptr": {
+          "pointer": "float32"
+        },
+        "operation_dense": {
+          "pointer": "float32"
+        },
+        "jagged_offsets_ptr": {
+          "pointer": "int32"
+        },
+        "dense_indices_ptr": {
+          "pointer": "int32"
+        },
+        "jagged_value_row_stride": 64,
+        "dense_col_stride": 1,
+        "dense_row_stride": 64,
+        "dense_matrix_stride": 4096,
+        "JAGGED_DIM": 3,
+        "thread_block_row_size": 32,
+        "thread_block_col_size": 32,
+        "operation_function": null
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "JAGGED_DIM",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 29
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "thread_block_row_size",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 68
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 73
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 81
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 53
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "thread_block_col_size",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 68
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 73
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 81
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 61
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "operation_function",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "字符串 constexpr 选择 add/mul/无融合分支",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 45
+            },
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 50
+            },
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 71
+            },
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 75
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 45
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 50
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 71
+            },
+            {
+              "code": "INTEGER_TYPE_PROOF_MISSING",
+              "jit_relative_line": 75
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q3_l2norm_single_row",
+      "collection": "Q3TritonKernel",
+      "kind": "kernel",
+      "kernel": "l2norm_fwd_kernel1",
+      "path": "Q3TritonKernel/src/kernels/fla/modules/l2norm.py",
+      "definition_line": 42,
+      "file_sha256": "703fa8a6e86f1e6fd776751ad78d629eb2ded00d5c6546a405784d3db4d85ea3",
+      "jit_sha256": "2c6abfc60a05dbba332d061595fdd93e89cf20647e69fa7e3cfacda43ea639e8",
+      "arguments": {
+        "x": {
+          "pointer": "float32"
+        },
+        "y": {
+          "pointer": "float32"
+        },
+        "rstd": {
+          "pointer": "float32"
+        },
+        "eps": 1e-05,
+        "D": 96,
+        "BD": 128,
+        "T": 0,
+        "BR": 1
+      },
+      "dynamic": [],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "D",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "sqrt 无摘要，无法完成全部地址/mask 使用链",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 14
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 15
+            },
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 20
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BD",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "改变浮点 sum 归约树，首版保留数值顺序",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "FLOAT_USE_NOT_SUPPORTED",
+              "jit_relative_line": 20
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 17
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "T",
+          "expected": "Unknown",
+          "actual": "Unknown",
+          "why": "前一分支 sqrt 无摘要，尚未读到后一分支 T 的 static_assert",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "OPERATION_SUMMARY_MISSING",
+              "jit_relative_line": 21
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BR",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 12
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    },
+    {
+      "id": "q2_store_lowrank_int32",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_store_label_cache_triton_kernel",
+      "path": "Q2TritonKernel/src/kernels/store_lowrank.py",
+      "definition_line": 11,
+      "file_sha256": "5a08c416ac8680079c1409016da53a6d17c6a5ec3935e8312fa667a87f9807b6",
+      "jit_sha256": "56b2e4158ecbb26f4912b6566072ea32b4fad4fc437465a6f45f2906dd4c77bc",
+      "arguments": {
+        "label_cache_ptr": {
+          "pointer": "int32"
+        },
+        "key_lr_ptr": {
+          "pointer": "int32"
+        },
+        "block_idx_list_ptr": {
+          "pointer": "int32"
+        },
+        "token_idx_list_ptr": {
+          "pointer": "int32"
+        },
+        "head_num": 8,
+        "head_dim": 64,
+        "token_num": 37,
+        "l_stride_b": 8192,
+        "l_stride_h": 1024,
+        "l_stride_t": 64,
+        "l_stride_d": 1,
+        "k_stride_s": 512,
+        "k_stride_h": 64,
+        "k_stride_d": 1,
+        "BATCH_BLOCK_NUM": 16
+      },
+      "dynamic": [
+        "token_num",
+        "l_stride_b",
+        "l_stride_h",
+        "l_stride_t",
+        "l_stride_d",
+        "k_stride_s",
+        "k_stride_h",
+        "k_stride_d"
+      ],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "head_num",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "真实 head 数，完整 arange 范围随值改变",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 23
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "head_dim",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "真实 head 维度，完整 arange 范围随值改变",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 25
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "token_num",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "l_stride_b",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "l_stride_h",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "l_stride_t",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "l_stride_d",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "k_stride_s",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "k_stride_h",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "k_stride_d",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "仅用于整数地址、步长或 mask；没有编译期用途",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "BATCH_BLOCK_NUM",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 21
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        }
+      ]
+    },
+    {
+      "id": "q2_paged_kv_int32",
+      "collection": "Q2TritonKernel",
+      "kind": "kernel",
+      "kernel": "_store_paged_kv_cache_kernel",
+      "path": "Q2TritonKernel/src/kernels/store_paged_kv_cache.py",
+      "definition_line": 9,
+      "file_sha256": "c264b9fc3614b56f411777041a67a6d920a1da029af98b5deb214b706efc68c5",
+      "jit_sha256": "01f9e335004e25a792f1be9432db49363a08f7c4b3bf9f169d5e626553e111a8",
+      "arguments": {
+        "k_ptr": {
+          "pointer": "int32"
+        },
+        "v_ptr": {
+          "pointer": "int32"
+        },
+        "key_cache_ptr": {
+          "pointer": "int32"
+        },
+        "value_cache_ptr": {
+          "pointer": "int32"
+        },
+        "block_table_ptr": {
+          "pointer": "int32"
+        },
+        "cu_seqlens_ptr": {
+          "pointer": "int32"
+        },
+        "kv_lens_ptr": {
+          "pointer": "int32"
+        },
+        "batch_size": 3,
+        "stride_k_tok": 512,
+        "stride_k_head": 64,
+        "stride_k_dim": 1,
+        "stride_v_tok": 512,
+        "stride_v_head": 64,
+        "stride_v_dim": 1,
+        "stride_kc_blk": 8192,
+        "stride_kc_head": 1024,
+        "stride_kc_tok": 64,
+        "stride_kc_dim": 1,
+        "stride_vc_blk": 8192,
+        "stride_vc_head": 1024,
+        "stride_vc_tok": 64,
+        "stride_vc_dim": 1,
+        "stride_bt_batch": 8,
+        "stride_bt_blk": 1,
+        "num_kv_heads": 8,
+        "head_dim": 64,
+        "block_size": 16,
+        "CHUNK_SIZE": 32,
+        "IS_DECODE": true,
+        "HAS_KV_LENS": true
+      },
+      "dynamic": [
+        "block_size"
+      ],
+      "recipe": null,
+      "parameters": [
+        {
+          "parameter": "head_dim",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "无 head 维度 mask 的完整列范围，决定真实计算维度",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 79
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "block_size",
+          "expected": "RuntimeEligible",
+          "actual": "RuntimeEligible",
+          "why": "整数整除/取余计算物理 KV block 地址；并非 arange 的 tile",
+          "required_reason": "",
+          "reasons": [],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "CHUNK_SIZE",
+          "expected": "Unknown",
+          "actual": "StaticRequired",
+          "why": "R3 形状参数；没有适用于该分块的完整覆盖、启动适配和数值证明，不能仅凭 arange 判 StaticRequired",
+          "required_reason": "",
+          "reasons": [
+            {
+              "code": "CDIV_TYPE_PROOF_MISSING",
+              "jit_relative_line": 50
+            },
+            {
+              "code": "STATIC_ARANGE",
+              "jit_relative_line": 76
+            }
+          ],
+          "matches": false,
+          "known_gap": "G1_SHAPE_IS_NOT_STATIC_PROOF"
+        },
+        {
+          "parameter": "IS_DECODE",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 38
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        },
+        {
+          "parameter": "HAS_KV_LENS",
+          "expected": "StaticRequired",
+          "actual": "StaticRequired",
+          "why": "R1 编译期模式选择；两个分支均需检查",
+          "required_reason": "CONTROL_SPECIALIZATION_PRESERVED",
+          "reasons": [
+            {
+              "code": "CONTROL_SPECIALIZATION_PRESERVED",
+              "jit_relative_line": 47
+            }
+          ],
+          "matches": true,
+          "known_gap": null
+        }
+      ]
+    }
+  ]
+}
