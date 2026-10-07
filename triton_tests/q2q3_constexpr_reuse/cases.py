@@ -90,11 +90,13 @@ CASES = [
     Case("q2_silu", "Q2TritonKernel", "activation/silu.py", "_silu_fwd_kernel", {
         **pointers("x y"), "stride_row": 128, "n_rows": 17, "n_cols": 96,
         "BLOCK_SIZE_N": 128, "BLOCK_SIZE_M": 4,
-    }, {"BLOCK_SIZE_N": TILE, "BLOCK_SIZE_M": TILE}),
+    }, {"BLOCK_SIZE_N": Expectation(SCHEDULE, "T01：完整遍历列轴；与行轴证明组合"),
+        "BLOCK_SIZE_M": Expectation(SCHEDULE, "grid-stride 完整覆盖行轴；与固定列遍历及 N 轴证明组合")}),
     Case("q2_swiglu", "Q2TritonKernel", "activation/swiglu.py", "_swiglu_fwd_kernel", {
         **pointers("a b c"), "stride_row": 128, "n_rows": 17, "n_cols": 96,
         "BLOCK_SIZE_N": 128, "BLOCK_SIZE_M": 4,
-    }, {"BLOCK_SIZE_N": TILE, "BLOCK_SIZE_M": TILE}),
+    }, {"BLOCK_SIZE_N": Expectation(SCHEDULE, "T01：完整遍历列轴；与行轴证明组合"),
+        "BLOCK_SIZE_M": Expectation(SCHEDULE, "grid-stride 完整覆盖行轴；与固定列遍历及 N 轴证明组合")}),
     Case("q2_rmsnorm", "Q2TritonKernel", "rmsnorm.py", "_rmsnorm_infer_kernel", {
         **pointers("X_ptr Y_ptr W_ptr"), "stride_x_row": 512, "stride_y_row": 512,
         "n_rows": 17, "n_cols": 384, "eps": 1e-5, "BLOCK_SIZE_M": 4, "BLOCK_SIZE_N": 128,
@@ -196,8 +198,8 @@ POINTER_GAP = Gap("G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC", UNKNOWN, "FLOAT_US
 
 tile_gaps = {
     "q2_store_lowrank": "BATCH_BLOCK_NUM", "q2_paged_kv": "CHUNK_SIZE",
-    "q2_attention_preprocess": "BLOCK_R", "q2_silu": "BLOCK_SIZE_N BLOCK_SIZE_M",
-    "q2_swiglu": "BLOCK_SIZE_N BLOCK_SIZE_M", "q2_rmsnorm": "BLOCK_SIZE_M",
+    "q2_attention_preprocess": "BLOCK_R", "q2_silu": "",
+    "q2_swiglu": "", "q2_rmsnorm": "BLOCK_SIZE_M",
     "q2_sdpa_dtype": "BLOCK_R", "q3_position_embeddings": "BLOCK_D BLOCK_N",
     "q3_jagged_to_dense": "thread_block_row_size thread_block_col_size", "q3_silu": "x_block_size",
 }

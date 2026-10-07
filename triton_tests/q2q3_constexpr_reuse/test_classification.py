@@ -1,5 +1,6 @@
 import ast
 import copy
+from dataclasses import asdict
 import inspect
 import sys
 from types import ModuleType, SimpleNamespace
@@ -8,7 +9,8 @@ import pytest
 
 from analysis_adapter import Pointer, SourceJIT, analyzer
 from cases import CASES, SCHEDULE, STATIC, UNKNOWN
-from run_analysis import analyze_case, bind_arguments, find_root
+from run_analysis import analyze_case, bind_arguments, find_root, kernel_path
+from snapshot import verify
 
 
 class KnownClassificationGap(AssertionError):
@@ -65,11 +67,22 @@ def renamed(fn, arguments):
     return clone, {names[name]: value for name, value in arguments.items()}
 
 
+def recipe_semantics(recipe):
+    """Ignore source provenance changed by alpha-renaming and ast.unparse."""
+    def clean(value):
+        if isinstance(value, dict):
+            return {key: clean(item) for key, item in value.items() if key not in ("line", "function")}
+        if isinstance(value, (tuple, list)):
+            return tuple(clean(item) for item in value)
+        return value
+    return clean(asdict(recipe)) if recipe is not None else None
+
+
 @pytest.mark.parametrize("case", CASES, ids=lambda case: case.id)
 def test_classification_does_not_depend_on_names(case, classification_roots):
     triton_root, kernel_root = classification_roots
     with analyzer(triton_root) as api:
-        fn = api.loader.kernel(kernel_root / case.collection / "src/kernels" / case.path, case.kernel)
+        fn = api.loader.kernel(kernel_path(kernel_root, case), case.kernel)
         arguments = bind_arguments(api, fn, case.arguments)
         clone, renamed_arguments = renamed(fn, arguments)
         before = api.analyze(fn, arguments, fn.cache_key)
@@ -82,7 +95,7 @@ def test_classification_does_not_depend_on_names(case, classification_roots):
     # ast.unparse changes physical lines; compare reasons, not line numbers.
     assert decisions(before) == decisions(after)
     assert before.plan.dynamic == after.plan.dynamic
-    assert before.recipe == after.recipe
+    assert recipe_semantics(before.recipe) == recipe_semantics(after.recipe)
 
 
 @pytest.mark.parametrize("mode", ["q3_jagged_to_dense", "q3_jagged_to_dense_no_fusion"])
@@ -90,7 +103,7 @@ def test_both_local_jit_helpers_are_analyzed(mode, classification_roots):
     triton_root, kernel_root = classification_roots
     case = next(c for c in CASES if c.id == mode)
     with analyzer(triton_root) as api:
-        fn = api.loader.kernel(kernel_root / case.collection / "src/kernels" / case.path, case.kernel)
+        fn = api.loader.kernel(kernel_path(kernel_root, case), case.kernel)
         profile = api.analyze(fn, bind_arguments(api, fn, case.arguments), fn.cache_key)
         assert {child.fn.name for _, child in profile.plan.helpers} == {
             "tensor_elementwise_add", "tensor_elementwise_mul"}
@@ -134,14 +147,14 @@ def test_exhausted_analysis_is_conservative(classification_roots):
 
 def test_source_loading_never_executes_imports_or_decorators(classification_roots, tmp_path):
     triton_root, kernel_root = classification_roots
-    original = kernel_root / "Q2TritonKernel/src/kernels/store_lowrank.py"
+    case = next(c for c in CASES if c.id == "q2_store_lowrank")
+    original = kernel_path(kernel_root, case)
     poisoned = tmp_path / "poisoned.py"
     poisoned.write_text("raise AssertionError('module was executed')\n" + original.read_text(), encoding="utf-8")
     with analyzer(triton_root) as api:
         fn = api.loader.kernel(poisoned, "_store_label_cache_triton_kernel")
         assert isinstance(fn, SourceJIT)
         assert fn.src == api.loader.kernel(original, fn.name).src
-        case = next(c for c in CASES if c.id == "q2_store_lowrank")
         assert api.analyze(fn, bind_arguments(api, fn, case.arguments), fn.cache_key).decisions
         with pytest.raises(AssertionError, match="must not execute"):
             fn()
@@ -159,3 +172,7 @@ def test_adapter_restores_modules_after_failure(classification_roots, monkeypatc
             raise RuntimeError("deliberate")
     assert observed == {name: value for name, value in sys.modules.items()
                         if name == "triton" or name.startswith(("triton.", "torch", "_q2q3_ascend_reuse"))}
+
+
+def test_frozen_snapshot():
+    verify()

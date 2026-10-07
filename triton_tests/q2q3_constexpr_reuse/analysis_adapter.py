@@ -31,6 +31,10 @@ class Constexpr:
         self.value = value
 
 
+class Dtype(Symbol):
+    """Language dtype identity for source-only isinstance checks."""
+
+
 class Pointer:
     """Type metadata only: no allocation, address or device access."""
 
@@ -141,13 +145,14 @@ class SourceLoader:
                                 try:
                                     if (isinstance(node.value, ast.Call)
                                             and ast.unparse(node.value.func) == "dtype"):
-                                        value = Symbol(ast.literal_eval(node.value.args[0]))
+                                        value = Dtype(ast.literal_eval(node.value.args[0]))
                                     else:
                                         value = literal(node.value)
                                 except (ValueError, TypeError):
                                     value = Symbol(target.id)
                                 setattr(namespace, target.id, value)
         namespaces["core"].constexpr = Constexpr
+        namespaces["core"].dtype = Dtype
         standard = self.load(root / "standard.py", extra_scope=namespaces)
         vars(namespaces["standard"]).update(standard)
         for node in ast.parse((root / "__init__.py").read_text()).body:

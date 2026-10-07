@@ -12,6 +12,7 @@ import subprocess
 
 from analysis_adapter import Pointer, analyzer
 from cases import CASES, RUNTIME, SCHEDULE
+from snapshot import verify
 
 
 def find_root(explicit, env, name):
@@ -46,8 +47,20 @@ def bind_arguments(api, fn, arguments):
     return bound.arguments
 
 
+def kernel_path(kernel_root, case):
+    if kernel_root is None:
+        return Path(__file__).with_name("kernels.py")
+    return Path(kernel_root) / case.collection / "src/kernels" / case.path
+
+
+def find_kernel_root(explicit=None):
+    if explicit or os.environ.get("TRITON_KERNEL_ROOT"):
+        return find_root(explicit, "TRITON_KERNEL_ROOT", "TritonAscendTest")
+    return None
+
+
 def analyze_case(api, kernel_root, case):
-    path = Path(kernel_root) / case.collection / "src/kernels" / case.path
+    path = kernel_path(kernel_root, case)
     fn = api.loader.kernel(path, case.kernel)
     names = {p.name for p in fn.params if p.is_constexpr}
     if names != set(case.expected):
@@ -74,7 +87,9 @@ def analyze_case(api, kernel_root, case):
                      "reasons": [{"code": code, "jit_relative_line": line} for code, line in decision.reasons],
                      "matches": match, "known_gap": gap.issue if known else None})
     return {"id": case.id, "collection": case.collection, "kind": case.kind, "kernel": case.kernel,
-            "path": f"{case.collection}/src/kernels/{case.path}", "definition_line": fn.starting_line_number,
+            "path": "kernels.py" if kernel_root is None else f"{case.collection}/src/kernels/{case.path}",
+            "source_path": f"{case.collection}/src/kernels/{case.path}",
+            "definition_line": fn.starting_line_number,
             "file_sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "jit_sha256": fn.cache_key,
             "arguments": case.arguments, "dynamic": [fn.arg_names[i] for i in profile.plan.dynamic],
             "recipe": asdict(profile.recipe) if profile.recipe else None, "parameters": rows}
@@ -87,7 +102,8 @@ def repository_info(path):
     return {"root": str(path), "revision": git("rev-parse", "HEAD"), "status": git("status", "--short")}
 
 
-def collect(triton_root, kernel_root):
+def collect(triton_root, kernel_root=None):
+    manifest = verify() if kernel_root is None else None
     with analyzer(triton_root) as api:
         records = [analyze_case(api, kernel_root, case) for case in CASES]
         rule_version = api.config.RULE_VERSION
@@ -101,8 +117,10 @@ def collect(triton_root, kernel_root):
             "language_sha256": {name: hashlib.sha256((Path(triton_root) / "python/triton/language" / name).read_bytes()).hexdigest()
                                 for name in ("__init__.py", "core.py", "math.py", "standard.py", "random.py")},
             "harness_sha256": {name: hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()
-                               for name in ("analysis_adapter.py", "cases.py", "run_analysis.py")},
-            "sources": {name: repository_info(Path(kernel_root) / name) for name in ("Q2TritonKernel", "Q3TritonKernel")},
+                               for name in ("analysis_adapter.py", "cases.py", "run_analysis.py", "snapshot.py", "kernels.py", "sources.json")},
+            "kernel_source": "frozen" if kernel_root is None else "upstream",
+            "sources": manifest["sources"] if manifest else {
+                name: repository_info(Path(kernel_root) / name) for name in ("Q2TritonKernel", "Q3TritonKernel")},
             "summary": {"profiles": len(records), "definitions": len({(r['path'], r['kernel']) for r in records}),
                         "parameters": len(rows), "matching": sum(row["matches"] for row in rows),
                         "mismatching": sum(not row["matches"] for row in rows),
@@ -138,12 +156,12 @@ def markdown(report):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--triton-ascend-root", type=Path)
-    parser.add_argument("--kernel-root", type=Path, help="TritonAscendTest root containing Q2TritonKernel and Q3TritonKernel")
+    parser.add_argument("--kernel-root", type=Path, help="Optional upstream TritonAscendTest root; defaults to bundled kernels.py")
     parser.add_argument("--output", type=Path, default=Path("reports/host_analysis"), help="Output stem for .json and .md")
     args = parser.parse_args(argv)
     try:
         triton_root = find_root(args.triton_ascend_root, "TRITON_ASCEND_ROOT", "triton-ascend")
-        kernel_root = find_root(args.kernel_root, "TRITON_KERNEL_ROOT", "TritonAscendTest")
+        kernel_root = find_kernel_root(args.kernel_root)
         report = collect(triton_root, kernel_root)
     except (FileNotFoundError, ValueError, AssertionError) as error:
         parser.exit(2, f"Analysis setup failed: {error}\n")

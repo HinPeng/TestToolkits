@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "description": "Frozen Q2/Q3 JIT definitions. Function text and JIT decorators are unchanged; host imports, wrappers and non-JIT decorators are omitted.",
+  "sources": {
+    "Q2TritonKernel": {
+      "revision": "5501de57cce016c69a56b95787b976fc9b767147",
+      "status": ""
+    },
+    "Q3TritonKernel": {
+      "revision": "e32d476c84bed89e58de2ca9eefd151104723fca",
+      "status": ""
+    }
+  },
+  "functions": {
+    "_store_label_cache_triton_kernel": {
+      "path": "Q2TritonKernel/src/kernels/store_lowrank.py",
+      "definition_line": 11,
+      "sha256": "91e0fe793e06daf9031cafe515c82b8f19b341312754e2cb4016f52e059b7b9c",
+      "source_file_sha256": "5a08c416ac8680079c1409016da53a6d17c6a5ec3935e8312fa667a87f9807b6",
+      "omitted_decorators": []
+    },
+    "_store_paged_kv_cache_kernel": {
+      "path": "Q2TritonKernel/src/kernels/store_paged_kv_cache.py",
+      "definition_line": 9,
+      "sha256": "c77a0d41e8cb3bd5defd87dfd9132e0979343bd220630840ffc3e0e1455e580e",
+      "source_file_sha256": "c264b9fc3614b56f411777041a67a6d920a1da029af98b5deb214b706efc68c5",
+      "omitted_decorators": []
+    },
+    "kernel_da_bwd_d": {
+      "path": "Q2TritonKernel/src/kernels/dllm_attention/bwd_d.py",
+      "definition_line": 19,
+      "sha256": "603a3eeed6478029fd871a7071f4fecec3a7bcc29c54ad984cbbabcf62b99ed4",
+      "source_file_sha256": "4d01577f54cf6c3c0a241b0ff3e2e36ef8c760eb96fe239bcd0378dd2e6383f7",
+      "omitted_decorators": [
+        "triton.autotune(configs=[], key=['N', 'H'])"
+      ]
+    },
+    "silu_activation": {
+      "path": "Q2TritonKernel/src/kernels/activation/silu.py",
+      "definition_line": 16,
+      "sha256": "6abc88cb206ae3f8cd09b45d6b73a3049b3e55230c50b70051f560793bbce164",
+      "source_file_sha256": "43d0af68e93ff6841507a775ceaab9125d5774e398de8cebf0fd503b34ff02de",
+      "omitted_decorators": []
+    },
+    "_silu_fwd_kernel": {
+      "path": "Q2TritonKernel/src/kernels/activation/silu.py",
+      "definition_line": 26,
+      "sha256": "43563407233e7c6f21160c195e66d6d1bf3b32a94783df79d827b5a1b5d1af77",
+      "source_file_sha256": "43d0af68e93ff6841507a775ceaab9125d5774e398de8cebf0fd503b34ff02de",
+      "omitted_decorators": [
+        "libentry()",
+        "triton.autotune(configs=[], key=['n_rows', 'n_cols'])"
+      ]
+    },
+    "silu": {
+      "path": "Q2TritonKernel/src/kernels/activation/swiglu.py",
+      "definition_line": 18,
+      "sha256": "770970acccc181976ed8c60cf62fecda51b9a509467cd76f73ff30d1f9a9cbe0",
+      "source_file_sha256": "82070a338c5c28f19c6acc87c9083f18c01b6874f4bf085ca4101d353670da1e",
+      "omitted_decorators": []
+    },
+    "_swiglu_fwd_kernel": {
+      "path": "Q2TritonKernel/src/kernels/activation/swiglu.py",
+      "definition_line": 28,
+      "sha256": "e49436a5df489caf19ec025eb6fce564b7b60eaa558d824fc393fd1ece8e0180",
+      "source_file_sha256": "82070a338c5c28f19c6acc87c9083f18c01b6874f4bf085ca4101d353670da1e",
+      "omitted_decorators": [
+        "libentry()",
+        "triton.autotune(configs=[], key=['n_rows', 'n_cols'])"
+      ]
+    },
+    "_rmsnorm_infer_kernel": {
+      "path": "Q2TritonKernel/src/kernels/rmsnorm.py",
+      "definition_line": 53,
+      "sha256": "8556dc0c2aa2fb250f69f36f43d2a033eb46fc0a5283037023192e2d4face3f9",
+      "source_file_sha256": "d04e68336e8cb3c971f0696675fc764dbd834b6be8ab00551a7fdcf4bd6cca7a",
+      "omitted_decorators": [
+        "libentry()",
+        "triton.autotune(configs=[], key=['n_rows', 'n_cols'])"
+      ]
+    },
+    "prepare_position_ids_kernel": {
+      "path": "Q2TritonKernel/src/kernels/fla/ops/utils/index.py",
+      "definition_line": 25,
+      "sha256": "a1831cb18c40d91673790b2cbba0907892f3b74cab92588cbcf3c2280cbc892c",
+      "source_file_sha256": "2c13dbe1b690204e79f0be73c9b6f3103cd018d040b4d077c70c2749793d064d",
+      "omitted_decorators": [
+        "triton.autotune(configs=[triton.Config({}, num_warps=num_warps) for num_warps in [4, 8, 16, 32]], key=['B'], **autotune_cache_kwargs)"
+      ]
+    },
+    "load_with_pred_1d": {
+      "path": "Q2TritonKernel/src/kernels/utils.py",
+      "definition_line": 53,
+      "sha256": "82c2f164a48e1d5a7ffb59e1a8c25f2adb06050aa331107f2e04a9e541377d75",
+      "source_file_sha256": "cdc93acbdf6cb5294c0e9284a2252e20478d68ef508cc36c871027f7bf1211b6",
+      "omitted_decorators": []
+    },
+    "store_with_pred_1d": {
+      "path": "Q2TritonKernel/src/kernels/utils.py",
+      "definition_line": 61,
+      "sha256": "8916dd94e69c1e0d6b453b58bbb4da765e7a4eb453ff1b4ba3bec37e73aad7b7",
+      "source_file_sha256": "cdc93acbdf6cb5294c0e9284a2252e20478d68ef508cc36c871027f7bf1211b6",
+      "omitted_decorators": []
+    },
+    "_compute_rope": {
+      "path": "Q2TritonKernel/src/kernels/rope.py",
+      "definition_line": 71,
+      "sha256": "2daa4e9999f567885b37e94b18b7a5405a3ab522bc14eecf161f53af89bbf2d0",
+      "source_file_sha256": "94c2c1f8745e8dc8d681e5bc95e1f2a5a7aedd9268d46338cd15c9f996afb11d",
+      "omitted_decorators": []
+    },
+    "_compute_rope_separated": {
+      "path": "Q2TritonKernel/src/kernels/rope.py",
+      "definition_line": 103,
+      "sha256": "86a6c3ba0fac5120fcbf2763fbaeb60f45ec45205cfe30010bd23013176dd374",
+      "source_file_sha256": "94c2c1f8745e8dc8d681e5bc95e1f2a5a7aedd9268d46338cd15c9f996afb11d",
+      "omitted_decorators": []
+    },
+    "kernel_sdpa_bwd_d": {
+      "path": "Q2TritonKernel/src/kernels/sdpa.py",
+      "definition_line": 442,
+      "sha256": "3a8a70b9438b73191730a30fb018b0c4ffa8b096e292ec42cb8056d8e94acd73",
+      "source_file_sha256": "c9636f70c3fb899e82da005654b4b523f1df6b4e34f662f38f7bdbaa8ac4b518",
+      "omitted_decorators": [
+        "triton.autotune(configs=[triton.Config({'multibuffer': True, 'BLOCK_R': 128}), triton.Config({'multibuffer': True, 'BLOCK_R': 64}), triton.Config({'multibuffer': False, 'BLOCK_R': 256}), triton.Config({'multibuffer': False, 'BLOCK_R': 128}), triton.Config({'multibuffer': False, 'BLOCK_R': 64})], key=['N', 'S', 'H'])"
+      ]
+    },
+    "compute_dh0_kernel": {
+      "path": "Q2TritonKernel/src/kernels/fla/modules/causal_conv1d_bwd.py",
+      "definition_line": 326,
+      "sha256": "e80d8ffe27c79a07dfb9962a8fd2a4b70457f095b7be9e5ccea0d4ff7f6b6e76",
+      "source_file_sha256": "17577ac4dacecd6c09fe8bcec8ccb39cbebf29eaa649299026e03a03155b081e",
+      "omitted_decorators": [
+        "triton.heuristics({'USE_ACTIVATION': lambda args: args['y'] is not None, 'IS_VARLEN': lambda args: args['cu_seqlens'] is not None})"
+      ]
+    },
+    "_flat_offset": {
+      "path": "Q3TritonKernel/src/kernels/fla/modules/activations.py",
+      "definition_line": 101,
+      "sha256": "a7ccbe796c7ba461158812ce489e28aa911f74e2696f09a69a7815affca4b446",
+      "source_file_sha256": "31b24469d4ce08b579f45e61b887cfda9d1d669fdcf88eeeeda9ca43e37a8bca",
+      "omitted_decorators": []
+    },
+    "_add_position_embeddings_kernel": {
+      "path": "Q3TritonKernel/src/kernels/recsys_example/add_position_embeddings/add_position_embeddings.py",
+      "definition_line": 53,
+      "sha256": "57df732fca0b80ceae7d6a5beb5976469965320b77da2eaef42bc90cc96d118a",
+      "source_file_sha256": "a65b479ca1c200f953515cda592f20bf8a9c4a0cc0846ccfed9614d22fa9046d",
+      "omitted_decorators": [
+        "triton_autotune(configs=_add_position_embeddings_configs(), key=['AUTOTUNE_MAX_SEQ_LEN'])"
+      ]
+    },
+    "tensor_elementwise_add": {
+      "path": "Q3TritonKernel/src/kernels/fbgemm/triton_jagged_to_dense/triton_jagged_to_dense.py",
+      "definition_line": 35,
+      "sha256": "03042f66730bf834c870bd45daedc409689d0363e9aade10dacd2d8a4f8b8667",
+      "source_file_sha256": "784c1d58fae5906868e4faf1d2b13450ce9aa4071d48fe095c82ba6c4d31632c",
+      "omitted_decorators": []
+    },
+    "tensor_elementwise_mul": {
+      "path": "Q3TritonKernel/src/kernels/fbgemm/triton_jagged_to_dense/triton_jagged_to_dense.py",
+      "definition_line": 40,
+      "sha256": "bd0f2f49d9079169f95fab5a14d488bb910fe98bba94e4d78478ba6edb065e23",
+      "source_file_sha256": "784c1d58fae5906868e4faf1d2b13450ce9aa4071d48fe095c82ba6c4d31632c",
+      "omitted_decorators": []
+    },
+    "triton_jagged_to_dense": {
+      "path": "Q3TritonKernel/src/kernels/fbgemm/triton_jagged_to_dense/triton_jagged_to_dense.py",
+      "definition_line": 71,
+      "sha256": "0bcb54917651772ec33e5ac32d1a913458a2608190805c8ee4642960a70ace7b",
+      "source_file_sha256": "784c1d58fae5906868e4faf1d2b13450ce9aa4071d48fe095c82ba6c4d31632c",
+      "omitted_decorators": [
+        "triton.autotune(configs=_get_autotune_configs(), key=['jagged_value_row_stride', 'dense_row_stride', 'dense_matrix_stride'])"
+      ]
+    },
+    "_silu_forward": {
+      "path": "Q3TritonKernel/src/kernels/recsys_example/silu/silu.py",
+      "definition_line": 29,
+      "sha256": "6723220119162dd1fad44756919c7bc846f71a2686d06cba4177962ef7c9037c",
+      "source_file_sha256": "7f7eb4d6d29d0f8fef83a3a7e1e9f3d95a5ed65db6ec4dc01a3849de9ad02581",
+      "omitted_decorators": [
+        "triton_autotune(silu_configs(), key=['x_size'])"
+      ]
+    },
+    "_layer_norm_fwd": {
+      "path": "Q3TritonKernel/src/kernels/recsys_example/layer_norm/layer_norm.py",
+      "definition_line": 37,
+      "sha256": "de8e11f56b2d0d29ee8d4f3332cf523fcd26b41a66e62922c1e94e37cb8ae04a",
+      "source_file_sha256": "a8246c4146d36c320b97c2ef0a3dc379707a627806f61f117fd909e5edf1a6e1",
+      "omitted_decorators": []
+    },
+    "l2norm_fwd_kernel1": {
+      "path": "Q3TritonKernel/src/kernels/fla/modules/l2norm.py",
+      "definition_line": 42,
+      "sha256": "538ac78453023bb532d5688ca1a711ed45478e9e21eb335dbaf3f1995862ffd6",
+      "source_file_sha256": "703fa8a6e86f1e6fd776751ad78d629eb2ded00d5c6546a405784d3db4d85ea3",
+      "omitted_decorators": [
+        "triton.autotune(configs=[triton.Config({'multibuffer': MB}) for MB in [True]], key=['D'], **autotune_cache_kwargs)"
+      ]
+    },
+    "_compare_and_swap": {
+      "path": "Q3TritonKernel/src/kernels/minimax_m3/topk_index_kernel.py",
+      "definition_line": 18,
+      "sha256": "4e7f13aedd5c7f421ef16bb6563f30883f985127ac9727b53c9782b10cf2a3ee",
+      "source_file_sha256": "b15e417a67b050665f08bd25767c77774b39bcf1ab77b66dc736ec7bdac31310",
+      "omitted_decorators": []
+    },
+    "_bitonic_merge": {
+      "path": "Q3TritonKernel/src/kernels/minimax_m3/topk_index_kernel.py",
+      "definition_line": 43,
+      "sha256": "7ae262576d46562d958a19634f37ed9debdc2ba2763b0f299c34b4aa47eb36e3",
+      "source_file_sha256": "b15e417a67b050665f08bd25767c77774b39bcf1ab77b66dc736ec7bdac31310",
+      "omitted_decorators": []
+    },
+    "_topk_index_partial_kernel": {
+      "path": "Q3TritonKernel/src/kernels/minimax_m3/topk_index_partial_kernel.py",
+      "definition_line": 43,
+      "sha256": "7b33f6c4039e896ec9cf2cc4c0b2cbf47a8e4bc85dc148c034c6eadcc13a641a",
+      "source_file_sha256": "64084baa2b27d3026909e3cb4b67a4e476a847332abc2c05defc9c7ded3a17b2",
+      "omitted_decorators": [
+        "triton.heuristics({'BLOCK_SIZE_T': lambda args: triton.next_power_of_2(args['topk'])})",
+        "triton.autotune(configs=configs, key=['topk', 'chunk_blocks', 'superblock_factor'], prune_configs_by={'early_config_prune': _prune_partial_configs})"
+      ]
+    },
+    "packunpack_sequence_kernel": {
+      "path": "Q3TritonKernel/src/kernels/fla/ops/utils/pack.py",
+      "definition_line": 29,
+      "sha256": "eeef071eb79737b7bf9a0d621c0b9aabeab83d8e047217291614862a8dd0ef70",
+      "source_file_sha256": "a3481f0aa79e8d089a2667ec4d61c2a1dbf6d1592105e300fb0876b6d4747055",
+      "omitted_decorators": [
+        "triton.autotune(configs=[triton.Config({}, num_warps=num_warps) for num_warps in [4, 8, 16, 32]], key=['D', 'PADDING_SIDE', 'PACK'], **autotune_cache_kwargs)"
+      ]
+    },
+    "mean_pooling_fwd_kernel": {
+      "path": "Q3TritonKernel/src/kernels/fla/ops/utils/pooling.py",
+      "definition_line": 30,
+      "sha256": "1bbe3800f10303a27a3b243472f09d5be1655eb92459aa60b070fc91897d497c",
+      "source_file_sha256": "f2549e5e9215f32ac3767d210688c52e917b27ab41b2f6b652904e7f32401874",
+      "omitted_decorators": [
+        "triton.heuristics({'IS_VARLEN': lambda args: args['cu_seqlens'] is not None})",
+        "triton.autotune(configs=[triton.Config({'BD': BD}, num_warps=num_warps) for BD in [16, 32, 64, 128] for num_warps in [1, 2, 4, 8]], key=['BT'], **autotune_cache_kwargs)"
+      ]
+    }
+  }
+}
