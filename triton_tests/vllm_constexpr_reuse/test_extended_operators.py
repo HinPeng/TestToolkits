@@ -121,6 +121,7 @@ def test_apply_all_penalties(case, kernels, strided):
     counts = [[(i + r) % 4 for i in range(vocab)] for r in range(rows)]
     repetition, frequency, presence = [2, 0.5, 1], [0.25, -0.5, 0], [0.5, -0.25, 0]
     expected = reference.penalties(logits, prompt, counts, repetition, frequency, presence)
+    first = None
     for step, block in enumerate((128, 256, 128)):
         backing, tail = guarded(case, (rows, vocab * step_stride + 16), torch.float32)
         values = backing[:, :vocab * step_stride:step_stride]
@@ -129,7 +130,7 @@ def test_apply_all_penalties(case, kernels, strided):
         masks = case.tensor(prompt, torch.bool)
         bins = case.tensor(counts, torch.int32)
         output_mask = bins > 0
-        case.launch(kernels.apply_all_penalties_kernel, (2,), values, masks, output_mask, bins,
+        desc = case.launch(kernels.apply_all_penalties_kernel, (2,), values, masks, output_mask, bins,
                     case.tensor(repetition, torch.float32), case.tensor(frequency, torch.float32),
                     case.tensor(presence, torch.float32), rows, vocab,
                     values.stride(0), values.stride(1), masks.stride(0), masks.stride(1),
@@ -139,6 +140,11 @@ def test_apply_all_penalties(case, kernels, strided):
         all_expected[:, :vocab * step_stride:step_stride] = torch.tensor(expected)
         case.check(f"penalties_{step}", backing, all_expected)
         case.check(f"tail_{step}", tail, [-777] * 64)
+
+        if step == 0:
+            first = desc
+        elif step == 1:
+            case.same_binary(first, desc)
 
 
 @pytest.mark.parametrize("dtype_name", ["float16", "bfloat16"])
