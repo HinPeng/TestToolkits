@@ -100,7 +100,7 @@ CASES = [
     Case("q2_rmsnorm", "Q2TritonKernel", "rmsnorm.py", "_rmsnorm_infer_kernel", {
         **pointers("X_ptr Y_ptr W_ptr"), "stride_x_row": 512, "stride_y_row": 512,
         "n_rows": 17, "n_cols": 384, "eps": 1e-5, "BLOCK_SIZE_M": 4, "BLOCK_SIZE_N": 128,
-    }, {"BLOCK_SIZE_M": TILE,
+    }, {"BLOCK_SIZE_M": Expectation(SCHEDULE, "固定 N 的列归约顺序；每个行块独立初始化与完成累加，M 仅改变行分组"),
         "BLOCK_SIZE_N": static("列 tile 改变块内 sum 与块间累加分组，首版保留浮点归约顺序 (§4.2 S4)")}),
     Case("q2_position_ids", "Q2TritonKernel", "fla/ops/utils/index.py", "prepare_position_ids_kernel", {
         **pointers("y cu_seqlens", "int32"), "B": 128,
@@ -155,7 +155,7 @@ CASES = [
         "operation_function": static("字符串 constexpr 选择 add/mul/无融合分支", "CONTROL_SPECIALIZATION_PRESERVED")}),
     Case("q3_silu", "Q3TritonKernel", "recsys_example/silu/silu.py", "_silu_forward", {
         **pointers("output_ptr input_ptr"), "x_size": 10001, "x_block_size": 8192,
-    }, {"x_block_size": TILE}),
+    }, {"x_block_size": Expectation(SCHEDULE, "逐元素直接分块；完整覆盖与 grid 适配已证明，指针元素类型转换不改变坐标")}),
     Case("q3_layernorm", "Q3TritonKernel", "recsys_example/layer_norm/layer_norm.py", "_layer_norm_fwd", {
         **pointers("X Y Mean Rstd"), "D": 96, "eps": 1e-5, "stride_x": 128, "stride_y": 128,
         "TRAINING": True, "BLOCK_D": 128, "COMPUTE_MEAN_AND_RSTD": True,
@@ -199,9 +199,9 @@ POINTER_GAP = Gap("G2_FLOAT_POINTER_IS_NOT_FLOAT_ARITHMETIC", UNKNOWN, "FLOAT_US
 tile_gaps = {
     "q2_store_lowrank": "BATCH_BLOCK_NUM", "q2_paged_kv": "CHUNK_SIZE",
     "q2_attention_preprocess": "BLOCK_R", "q2_silu": "",
-    "q2_swiglu": "", "q2_rmsnorm": "BLOCK_SIZE_M",
+    "q2_swiglu": "", "q2_rmsnorm": "",
     "q2_sdpa_dtype": "BLOCK_R", "q3_position_embeddings": "BLOCK_D BLOCK_N",
-    "q3_jagged_to_dense": "thread_block_row_size thread_block_col_size", "q3_silu": "x_block_size",
+    "q3_jagged_to_dense": "thread_block_row_size thread_block_col_size", "q3_silu": "",
 }
 pointer_gaps = {
     "q2_store_lowrank": "l_stride_b l_stride_h l_stride_t l_stride_d k_stride_s k_stride_h k_stride_d",
